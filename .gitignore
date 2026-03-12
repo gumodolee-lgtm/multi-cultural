@@ -1,0 +1,28 @@
+# 환경 변수 (API 키 포함 — 절대 커밋 금지)
+.env
+
+# 데이터베이스 (로컬 캐시)
+data/*.db
+data/*.sqlite
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# 빌드 결과물
+dist/
+build/
+*.spec
+*.exe
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# 로그
+*.log
+logs/

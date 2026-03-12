@@ -1,0 +1,44 @@
+# ============================================================
+# 다문화 정보 허브 — Python 패키지 목록
+# 설치: pip install -r requirements.txt
+# ============================================================
+
+# UI 프레임워크
+PyQt6>=6.7.0
+PyQt6-WebEngine>=6.7.0     # 뉴스 HTML 렌더링용
+
+# 데이터베이스
+SQLAlchemy>=2.0.0
+
+# HTTP 요청
+requests>=2.31.0
+urllib3>=2.0.0
+
+# RSS 파싱
+feedparser>=6.0.0
+
+# HTML 파싱
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# 스케줄링 (백그라운드 자동 업데이트)
+APScheduler>=3.10.0
+
+# 한국어 처리 (검색 형태소 분석)
+# 주의: KoNLPy는 Java(JDK 1.7+) 필요. 설치 전 JDK 확인.
+# pip install konlpy
+# konlpy>=0.6.0
+
+# 다국어 번역 (선택 — API 키 필요)
+# deepl>=1.17.0
+
+# 내보내기
+openpyxl>=3.1.0            # Excel 저장
+reportlab>=4.0.0            # PDF 저장
+
+# AI 요약 (선택 — API 키 필요)
+# anthropic>=0.30.0
+
+# 유틸리티
+python-dotenv>=1.0.0        # .env 파일 로드
+PyYAML>=6.0.1               # config.yaml 파싱

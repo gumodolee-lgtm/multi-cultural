@@ -1,0 +1,59 @@
+# ============================================================
+# 다문화 정보 허브 — 기본 설정
+# ============================================================
+
+app:
+  name: "다문화 정보 허브"
+  version: "0.1.0"
+  language: "ko"                # 기본 언어: ko | en | vi | zh
+  window_width: 1280
+  window_height: 800
+  font_size: 13                 # 기본 글자 크기 (pt)
+
+database:
+  path: "data/michub.db"        # SQLite DB 파일 위치
+
+scheduler:
+  # 백그라운드 자동 수집 주기
+  news_interval_minutes: 60     # 뉴스: 1시간마다
+  law_interval_hours: 24        # 법령: 24시간마다
+  support_interval_hours: 12    # 지원사업: 12시간마다
+  retry_count: 3                # 실패 시 재시도 횟수
+  retry_delay_seconds: 30       # 재시도 간격
+
+law_api:
+  # 법제처 Open API (data.go.kr)
+  base_url: "https://www.law.go.kr/DRF/lawSearch.do"
+  # 수집할 주요 법령 목록 (법령명 키워드)
+  target_laws:
+    - "다문화가족지원법"
+    - "재한외국인 처우 기본법"
+    - "출입국관리법"
+    - "국적법"
+    - "외국인근로자의 고용 등에 관한 법률"
+    - "난민법"
+
+news:
+  # RSS 피드 목록 — URL은 개발 전 직접 확인 후 입력
+  # 형식: {name: 언론사명, url: RSS_URL, enabled: true/false}
+  sources: []       # Phase 1에서 실제 URL 확인 후 채울 것
+
+  # 뉴스 키워드 필터 (RSS에서 이 단어 포함 기사만 수집)
+  keywords:
+    - "다문화"
+    - "결혼이민"
+    - "외국인 주민"
+    - "이주민"
+    - "다문화가족"
+    - "귀화"
+
+  # 최대 보관 기간 (이보다 오래된 뉴스 자동 삭제)
+  max_days: 90
+
+ui:
+  # 테마: light | dark | auto
+  theme: "light"
+  # 글자 크기 단계: small=11 / medium=13 / large=16
+  font_size_small: 11
+  font_size_medium: 13
+  font_size_large: 16
