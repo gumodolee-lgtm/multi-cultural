@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import QApplication
 
 from app.utils.config_loader import load_config
 from app.models.database import init_db
+from app.models.seed import seed_if_empty
 from app.ui.main_window import MainWindow
 from app.scheduler.scheduler import CollectorScheduler
 
@@ -44,9 +45,10 @@ def main() -> None:
     # 1. 설정 로드
     config = load_config()
 
-    # 2. DB 초기화 (테이블 생성)
+    # 2. DB 초기화 (테이블 생성) + 첫 실행 시 초기 데이터 시딩
     init_db(config.db_path)
     logger.info("DB 초기화 완료: %s", config.db_path)
+    seed_if_empty()
 
     # 3. Qt 애플리케이션 생성
     app = QApplication(sys.argv)

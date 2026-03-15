@@ -125,19 +125,19 @@ class NewsView(QWidget):
         self._populate_list()
 
     def _on_search(self, text: str) -> None:
-        filtered = [n for n in self._data if text.lower() in n["title"].lower() or text in n.get("content", "")]
-        self._populate_list(filtered)
+        if text.strip():
+            filtered = DataProvider.search_news(keyword=text)
+            self._populate_list(filtered)
+        else:
+            self._data = DataProvider.get_all_news()
+            self._populate_list()
 
     def _on_bookmark(self, item_id: int, _new_state: bool) -> None:
         DataProvider.toggle_bookmark("news", item_id)
 
     def _on_filter(self) -> None:
         vals = self._filter.get_values()
-        filtered = list(self._data)
         cat = vals.get("카테고리", "전체")
-        if cat != "전체":
-            filtered = [n for n in filtered if n.get("category") == cat]
         src = vals.get("출처", "전체")
-        if src != "전체":
-            filtered = [n for n in filtered if n.get("source") == src]
+        filtered = DataProvider.search_news(category=cat, source=src)
         self._populate_list(filtered)

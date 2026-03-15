@@ -118,14 +118,15 @@ class LawView(QWidget):
         self._populate_list()
 
     def _on_search(self, text: str) -> None:
-        t = text.lower()
-        filtered = [l for l in self._data if t in l["name"].lower() or t in l.get("content", "").lower()]
-        self._populate_list(filtered)
+        if text.strip():
+            filtered = DataProvider.search_laws(keyword=text)
+            self._populate_list(filtered)
+        else:
+            self._data = DataProvider.get_all_laws()
+            self._populate_list()
 
     def _on_filter(self) -> None:
         vals = self._filter.get_values()
         cat = vals.get("분류", "전체")
-        if cat == "전체":
-            self._populate_list()
-        else:
-            self._populate_list([l for l in self._data if l.get("category") == cat])
+        filtered = DataProvider.search_laws(category=cat)
+        self._populate_list(filtered)

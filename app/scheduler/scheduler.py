@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 from typing import TYPE_CHECKING
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -81,8 +82,8 @@ class CollectorScheduler:
             sched_cfg.support_interval_hours,
         )
 
-        # 즉시 1회 수집 실행
-        self.run_once()
+        # 즉시 1회 수집 실행 (백그라운드 스레드에서 — UI 블로킹 방지)
+        threading.Thread(target=self.run_once, daemon=True).start()
 
     # -- 개별 작업 래퍼 (시그널 발행) --------------------------------
 

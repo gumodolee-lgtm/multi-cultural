@@ -81,15 +81,11 @@ class SearchView(QWidget):
 
     def _on_search(self, text: str) -> None:
         self._clear_results()
-        t = text.lower()
 
-        # DB에서 검색
-        all_news = DataProvider.get_all_news()
-        all_laws = DataProvider.get_all_laws()
-        all_support = DataProvider.get_all_support()
-        news_results = [n for n in all_news if t in n["title"].lower() or t in n.get("content", "").lower()]
-        law_results = [l for l in all_laws if t in l["name"].lower() or t in l.get("content", "").lower()]
-        support_results = [s for s in all_support if t in s["name"].lower() or t in s.get("description", "").lower()]
+        # DB 쿼리로 검색
+        news_results = DataProvider.search_news(keyword=text) if text.strip() else []
+        law_results = DataProvider.search_laws(keyword=text) if text.strip() else []
+        support_results = DataProvider.search_support(keyword=text) if text.strip() else []
 
         total = len(news_results) + len(law_results) + len(support_results)
         summary = QLabel(f"'{text}' 검색 결과: 총 {total}건")

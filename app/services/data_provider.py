@@ -107,6 +107,27 @@ class DataProvider:
             session.close()
 
     @staticmethod
+    def search_laws(keyword: str = "", category: str = "") -> list[dict]:
+        """법령을 검색/필터링한다."""
+        session = _get_session()
+        if session is None:
+            return []
+        try:
+            q = select(Law).order_by(Law.amended_date.desc())
+            if keyword:
+                q = q.where(or_(
+                    Law.name.contains(keyword),
+                    Law.content.contains(keyword),
+                    Law.summary.contains(keyword),
+                ))
+            if category and category != "전체":
+                q = q.where(Law.category == category)
+            rows = session.execute(q).scalars().all()
+            return [DataProvider._law_to_dict(r) for r in rows]
+        finally:
+            session.close()
+
+    @staticmethod
     def _law_to_dict(l: Law) -> dict:
         return {
             "id": l.id,
@@ -137,6 +158,29 @@ class DataProvider:
             if not rows:
                 from app.ui.mock_data import MOCK_SUPPORT
                 return list(MOCK_SUPPORT)
+            return [DataProvider._support_to_dict(r) for r in rows]
+        finally:
+            session.close()
+
+    @staticmethod
+    def search_support(keyword: str = "", org_type: str = "", region: str = "") -> list[dict]:
+        """지원사업을 검색/필터링한다."""
+        session = _get_session()
+        if session is None:
+            return []
+        try:
+            q = select(SupportProgram).order_by(SupportProgram.apply_end.asc())
+            if keyword:
+                q = q.where(or_(
+                    SupportProgram.name.contains(keyword),
+                    SupportProgram.description.contains(keyword),
+                    SupportProgram.benefit.contains(keyword),
+                ))
+            if org_type and org_type != "전체":
+                q = q.where(SupportProgram.org_type == org_type)
+            if region and region != "전체":
+                q = q.where(SupportProgram.region == region)
+            rows = session.execute(q).scalars().all()
             return [DataProvider._support_to_dict(r) for r in rows]
         finally:
             session.close()

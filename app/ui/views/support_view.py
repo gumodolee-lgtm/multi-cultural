@@ -117,17 +117,16 @@ class SupportView(QWidget):
         self._populate_list()
 
     def _on_search(self, text: str) -> None:
-        t = text.lower()
-        filtered = [s for s in self._data if t in s["name"].lower() or t in s.get("description", "").lower()]
-        self._populate_list(filtered)
+        if text.strip():
+            filtered = DataProvider.search_support(keyword=text)
+            self._populate_list(filtered)
+        else:
+            self._data = DataProvider.get_all_support()
+            self._populate_list()
 
     def _on_filter(self) -> None:
         vals = self._filter.get_values()
-        filtered = list(self._data)
         org = vals.get("기관유형", "전체")
-        if org != "전체":
-            filtered = [s for s in filtered if s.get("org_type") == org]
         region = vals.get("지역", "전체")
-        if region != "전체":
-            filtered = [s for s in filtered if s.get("region") == region]
+        filtered = DataProvider.search_support(org_type=org, region=region)
         self._populate_list(filtered)
