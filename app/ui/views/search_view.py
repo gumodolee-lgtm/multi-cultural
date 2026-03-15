@@ -138,6 +138,9 @@ class SearchView(QWidget):
             title = QLabel(f"🏛️  {item['name']}")
             meta = QLabel(f"{item.get('organizer', '')}  ·  {item.get('region', '')}")
 
+        title.setTextFormat(Qt.TextFormat.PlainText)
+        meta.setTextFormat(Qt.TextFormat.PlainText)
+
         title.setStyleSheet("font-size: 13px; font-weight: bold; color: #212121;")
         title.setWordWrap(True)
         layout.addWidget(title)

@@ -10,7 +10,8 @@ from __future__ import annotations
 import logging
 from datetime import date, datetime
 from typing import TYPE_CHECKING
-from xml.etree import ElementTree as ET
+from defusedxml.ElementTree import fromstring, ParseError
+from xml.etree.ElementTree import Element
 
 import requests
 from sqlalchemy import select
@@ -72,8 +73,8 @@ class LawService:
 
         # XML 파싱
         try:
-            root = ET.fromstring(resp.text)
-        except ET.ParseError:
+            root = fromstring(resp.text)
+        except ParseError:
             logger.warning("법제처 XML 파싱 실패: %s", query)
             return 0
 
@@ -130,7 +131,7 @@ class LawService:
         return saved
 
     @staticmethod
-    def _text(el: ET.Element, tag: str) -> str | None:
+    def _text(el: Element, tag: str) -> str | None:
         child = el.find(tag)
         return child.text.strip() if child is not None and child.text else None
 

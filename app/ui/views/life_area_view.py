@@ -178,15 +178,18 @@ class LifeAreaView(QWidget):
         layout.setSpacing(4)
 
         title = QLabel(data["title"])
+        title.setTextFormat(Qt.TextFormat.PlainText)
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         title.setWordWrap(True)
         layout.addWidget(title)
 
         meta = QLabel(f"{data.get('source', '')}  ·  {data.get('published', '')}  ·  {data.get('category', '')}")
+        meta.setTextFormat(Qt.TextFormat.PlainText)
         meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
         layout.addWidget(meta)
 
         summary = QLabel(data.get("summary", ""))
+        summary.setTextFormat(Qt.TextFormat.PlainText)
         summary.setStyleSheet("color: #616161; font-size: 12px;")
         summary.setWordWrap(True)
         layout.addWidget(summary)
@@ -208,14 +211,17 @@ class LifeAreaView(QWidget):
         layout.setSpacing(4)
 
         title = QLabel(f"⚖️  {data['name']}")
+        title.setTextFormat(Qt.TextFormat.PlainText)
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         layout.addWidget(title)
 
         meta = QLabel(f"개정 {data.get('amended_date', '')}  ·  시행 {data.get('effective_date', '')}")
+        meta.setTextFormat(Qt.TextFormat.PlainText)
         meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
         layout.addWidget(meta)
 
         summary = QLabel(data.get("summary", ""))
+        summary.setTextFormat(Qt.TextFormat.PlainText)
         summary.setStyleSheet("color: #616161; font-size: 12px;")
         summary.setWordWrap(True)
         layout.addWidget(summary)
@@ -233,6 +239,7 @@ class LifeAreaView(QWidget):
         layout.setSpacing(4)
 
         title = QLabel(f"🏛️  {data['name']}")
+        title.setTextFormat(Qt.TextFormat.PlainText)
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         title.setWordWrap(True)
         layout.addWidget(title)
@@ -241,10 +248,12 @@ class LifeAreaView(QWidget):
         if data.get("apply_end"):
             meta_parts.append(f"마감: {data['apply_end']}")
         meta = QLabel("  ·  ".join(p for p in meta_parts if p))
+        meta.setTextFormat(Qt.TextFormat.PlainText)
         meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
         layout.addWidget(meta)
 
         benefit = QLabel(f"💰 {data.get('benefit', '')}")
+        benefit.setTextFormat(Qt.TextFormat.PlainText)
         benefit.setStyleSheet("color: #2E7D32; font-size: 12px;")
         benefit.setWordWrap(True)
         layout.addWidget(benefit)

@@ -112,6 +112,11 @@ class PdfParser:
                 })
                 resp.raise_for_status()
 
+                # 파일 크기 제한 (50MB)
+                if len(resp.content) > 50 * 1024 * 1024:
+                    logger.warning("PDF 파일 크기 초과 (%d bytes) — 건너뜀", len(resp.content))
+                    continue
+
                 content_type = resp.headers.get("Content-Type", "")
                 if "pdf" in content_type.lower() or resp.content[:5] == b"%PDF-":
                     save_path = self._data_dir / "다문화가족지원센터_현황.pdf"

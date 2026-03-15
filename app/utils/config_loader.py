@@ -91,7 +91,7 @@ def load_config(config_path: Path | None = None) -> AppConfig:
         # 환경 변수에서 API 정보 로드
         public_data_api_key=os.getenv("PUBLIC_DATA_API_KEY", ""),
         multicultural_survey_api_key=os.getenv("MULTICULTURAL_SURVEY_API_KEY", ""),
-        law_api_key=os.getenv("LAW_API_OC", "test"),   # 기본값 test (법제처 OC 파라미터)
+        law_api_key=os.getenv("LAW_API_OC", ""),   # 법제처 OC 파라미터 (.env에 설정 필요)
         deepl_api_key=os.getenv("DEEPL_API_KEY", ""),
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
     )

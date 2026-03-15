@@ -128,11 +128,13 @@ class DashboardView(QWidget):
 
         left = QVBoxLayout()
         title = QLabel(data["title"])
+        title.setTextFormat(Qt.TextFormat.PlainText)
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         title.setWordWrap(True)
         left.addWidget(title)
 
         meta = QLabel(f"{data.get('source', '')}  ·  {data.get('published', '')}  ·  {data.get('category', '')}")
+        meta.setTextFormat(Qt.TextFormat.PlainText)
         meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
         left.addWidget(meta)
         layout.addLayout(left, 1)
@@ -150,11 +152,13 @@ class DashboardView(QWidget):
 
         left = QVBoxLayout()
         title = QLabel(data.get("name", ""))
+        title.setTextFormat(Qt.TextFormat.PlainText)
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         title.setWordWrap(True)
         left.addWidget(title)
 
         meta = QLabel(f"{data.get('organizer', '')}  ·  마감: {data.get('apply_end', '')}  ·  {data.get('region', '')}")
+        meta.setTextFormat(Qt.TextFormat.PlainText)
         meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
         left.addWidget(meta)
         layout.addLayout(left, 1)

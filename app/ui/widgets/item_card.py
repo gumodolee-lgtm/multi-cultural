@@ -28,8 +28,16 @@ class _BaseCard(QFrame):
         self.clicked.emit(self._item_id)
         super().mousePressEvent(event)
 
+    @staticmethod
+    def _plain_label(text: str) -> QLabel:
+        """외부 데이터용 PlainText QLabel — HTML 렌더링 방지."""
+        lbl = QLabel(text)
+        lbl.setTextFormat(Qt.TextFormat.PlainText)
+        return lbl
+
     def _make_tag(self, text: str) -> QLabel:
         tag = QLabel(text)
+        tag.setTextFormat(Qt.TextFormat.PlainText)
         style = TAG_STYLE_MAP.get(text, TAG_STYLE_MAP.get("정책", ""))
         tag.setStyleSheet(style)
         return tag
@@ -63,7 +71,7 @@ class NewsCard(_BaseCard):
         # 상단: 카테고리 + 출처 + 날짜 + 북마크
         top = QHBoxLayout()
         top.addWidget(self._make_tag(data.get("category", "")))
-        source = QLabel(f"{data.get('source', '')}  ·  {data.get('published', '')}")
+        source = self._plain_label(f"{data.get('source', '')}  ·  {data.get('published', '')}")
         source.setStyleSheet("color: #9E9E9E; font-size: 11px;")
         top.addWidget(source)
         top.addStretch()
@@ -71,13 +79,13 @@ class NewsCard(_BaseCard):
         layout.addLayout(top)
 
         # 제목
-        title = QLabel(data.get("title", ""))
+        title = self._plain_label(data.get("title", ""))
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         title.setWordWrap(True)
         layout.addWidget(title)
 
         # 요약
-        summary = QLabel(data.get("summary", ""))
+        summary = self._plain_label(data.get("summary", ""))
         summary.setStyleSheet("color: #616161; font-size: 12px;")
         summary.setWordWrap(True)
         layout.addWidget(summary)
@@ -94,18 +102,18 @@ class LawCard(_BaseCard):
 
         top = QHBoxLayout()
         top.addWidget(self._make_tag(data.get("category", "")))
-        date_lbl = QLabel(f"개정 {data.get('amended_date', '')}  ·  시행 {data.get('effective_date', '')}")
+        date_lbl = self._plain_label(f"개정 {data.get('amended_date', '')}  ·  시행 {data.get('effective_date', '')}")
         date_lbl.setStyleSheet("color: #9E9E9E; font-size: 11px;")
         top.addWidget(date_lbl)
         top.addStretch()
         top.addWidget(self._make_bookmark_btn(data.get("is_bookmarked", False)))
         layout.addLayout(top)
 
-        title = QLabel(data.get("name", ""))
+        title = self._plain_label(data.get("name", ""))
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         layout.addWidget(title)
 
-        summary = QLabel(data.get("summary", ""))
+        summary = self._plain_label(data.get("summary", ""))
         summary.setStyleSheet("color: #616161; font-size: 12px;")
         summary.setWordWrap(True)
         layout.addWidget(summary)
@@ -122,26 +130,26 @@ class SupportCard(_BaseCard):
 
         top = QHBoxLayout()
         top.addWidget(self._make_tag(data.get("org_type", "")))
-        region_lbl = QLabel(data.get("region", ""))
+        region_lbl = self._plain_label(data.get("region", ""))
         region_lbl.setStyleSheet("color: #757575; font-size: 11px;")
         top.addWidget(region_lbl)
-        period = QLabel(f"{data.get('apply_start', '')} ~ {data.get('apply_end', '')}")
+        period = self._plain_label(f"{data.get('apply_start', '')} ~ {data.get('apply_end', '')}")
         period.setStyleSheet("color: #9E9E9E; font-size: 11px;")
         top.addWidget(period)
         top.addStretch()
         top.addWidget(self._make_bookmark_btn(data.get("is_bookmarked", False)))
         layout.addLayout(top)
 
-        title = QLabel(data.get("name", ""))
+        title = self._plain_label(data.get("name", ""))
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         title.setWordWrap(True)
         layout.addWidget(title)
 
-        benefit = QLabel(f"💰 {data.get('benefit', '')}")
+        benefit = self._plain_label(f"💰 {data.get('benefit', '')}")
         benefit.setStyleSheet("color: #2E7D32; font-size: 12px;")
         benefit.setWordWrap(True)
         layout.addWidget(benefit)
 
-        org = QLabel(f"📞 {data.get('organizer', '')} ({data.get('contact', '')})")
+        org = self._plain_label(f"📞 {data.get('organizer', '')} ({data.get('contact', '')})")
         org.setStyleSheet("color: #757575; font-size: 11px;")
         layout.addWidget(org)

@@ -129,6 +129,9 @@ class BookmarkView(QWidget):
             title = QLabel(item["name"])
             meta = QLabel(f"{item['organizer']}  ·  {item['region']}")
 
+        title.setTextFormat(Qt.TextFormat.PlainText)
+        meta.setTextFormat(Qt.TextFormat.PlainText)
+
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         title.setWordWrap(True)
         info.addWidget(title)
