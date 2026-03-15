@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from app.ui.mock_data import MOCK_SUPPORT
+from app.services.data_provider import DataProvider
 from app.ui.widgets.search_bar import SearchBar
 from app.ui.widgets.filter_bar import FilterBar
 from app.ui.widgets.item_card import SupportCard
@@ -18,7 +18,7 @@ from app.ui.widgets.detail_panel import DetailPanel
 class SupportView(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._data = list(MOCK_SUPPORT)
+        self._data = DataProvider.get_all_support()
         self._build_ui()
         self._populate_list()
 
@@ -85,9 +85,13 @@ class SupportView(QWidget):
             for item in data:
                 card = SupportCard(item)
                 card.clicked.connect(self._show_detail)
+                card.bookmark_toggled.connect(self._on_bookmark)
                 self._list_layout.addWidget(card)
 
         self._list_layout.addStretch()
+
+    def _on_bookmark(self, item_id: int, _new_state: bool) -> None:
+        DataProvider.toggle_bookmark("support", item_id)
 
     def _show_detail(self, item_id: int) -> None:
         item = next((s for s in self._data if s["id"] == item_id), None)
@@ -107,6 +111,10 @@ class SupportView(QWidget):
             body=item["description"],
             url=item.get("url", ""),
         )
+
+    def refresh_data(self) -> None:
+        self._data = DataProvider.get_all_support()
+        self._populate_list()
 
     def _on_search(self, text: str) -> None:
         t = text.lower()

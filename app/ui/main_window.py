@@ -5,61 +5,75 @@
 """
 from __future__ import annotations
 
+import logging
+import threading
+from typing import TYPE_CHECKING
+
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
     QLabel, QPushButton, QStackedWidget, QStatusBar,
     QFrame, QSizePolicy, QScrollArea,
+    QSystemTrayIcon, QMenu,
 )
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QFont, QCursor
+from PyQt6.QtGui import QFont, QCursor, QIcon, QPixmap, QPainter, QColor
 
 from app.utils.config_loader import AppConfig
+from app.utils.i18n import tr, set_language, get_language, get_supported_languages
+from app.ui.signals import CollectionSignal
 from app.ui.views import (
     DashboardView, NewsView, LawView, SupportView,
-    SearchView, BookmarkView, SettingsView,
+    SearchView, BookmarkView, SettingsView, HelpView,
+    VisaAreaView, HealthAreaView, FamilyAreaView,
+    EducationAreaView, JobAreaView,
 )
 
+if TYPE_CHECKING:
+    from app.scheduler.scheduler import CollectorScheduler
+
+logger = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------
-# 메뉴 구조 정의 — 안 A: 생활영역별 (다누리 방식)
+# 메뉴 구조 정의 — (icon, i18n_key, nav_key)
+# label은 i18n 키로 관리 (None = 그룹 헤더 없음)
 # ------------------------------------------------------------------
 _MENU_GROUPS = [
     {
-        "label": None,
+        "label_key": None,
         "items": [
-            ("🏠", "홈", "dashboard"),
+            ("🏠", "home", "dashboard"),
         ],
     },
     {
-        "label": "생활 영역",
+        "label_key": "life_areas",
         "items": [
-            ("🛂", "비자·체류", "visa"),
-            ("⚕️",  "의료·복지", "health"),
-            ("👶", "가족·육아", "family"),
-            ("🎓", "교육·문화", "education"),
-            ("💼", "일자리", "job"),
+            ("🛂", "visa", "visa"),
+            ("⚕️",  "health", "health"),
+            ("👶", "family", "family"),
+            ("🎓", "education", "education"),
+            ("💼", "job", "job"),
         ],
     },
     {
-        "label": "정보",
+        "label_key": "information",
         "items": [
-            ("📰", "뉴스·공지", "news"),
-            ("⚖️",  "법령·규정", "law"),
-            ("🏛️", "지원사업", "support"),
+            ("📰", "news", "news"),
+            ("⚖️",  "law", "law"),
+            ("🏛️", "support", "support"),
         ],
     },
     {
-        "label": "도구",
+        "label_key": "tools",
         "items": [
-            ("🔍", "통합 검색", "search"),
-            ("⭐", "즐겨찾기", "bookmark"),
+            ("🔍", "search", "search"),
+            ("⭐", "bookmark", "bookmark"),
         ],
     },
 ]
 
 _BOTTOM_ITEMS = [
-    ("⚙️", "설정", "settings"),
-    ("❓", "도움말", "help"),
+    ("⚙️", "settings", "settings"),
+    ("❓", "help", "help"),
 ]
 
 # 전체 메뉴 키 목록 (순서 보장)
@@ -84,21 +98,6 @@ C_CONTENT_BG   = "#FFFFFF"
 C_HEADER_BG    = "#FFFFFF"
 C_HEADER_BOR   = "#EEEEEE"
 C_DIVIDER      = "#E5E5E5"
-
-_BTN_STYLE = """
-    QPushButton {{
-        text-align: left;
-        padding: 6px 14px 6px 14px;
-        border: none;
-        border-radius: 6px;
-        background: {bg};
-        color: {fg};
-        font-size: 13px;
-    }}
-    QPushButton:hover {{
-        background: {hover};
-    }}
-"""
 
 
 class NavButton(QPushButton):
@@ -161,9 +160,15 @@ class MainWindow(QMainWindow):
         self._config = config
         self._nav_buttons: dict[str, NavButton] = {}
         self._current_key: str | None = None
+        self._scheduler: CollectorScheduler | None = None
+
+        # 시그널 객체 — 스케줄러와 공유
+        self.collection_signal = CollectionSignal()
 
         self._setup_window()
         self._build_ui()
+        self._setup_tray()
+        self._connect_signals()
         self._navigate_to("dashboard")
 
     # ------------------------------------------------------------------
@@ -197,6 +202,157 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self._status_bar)
 
     # ------------------------------------------------------------------
+    # 시그널 연결
+    # ------------------------------------------------------------------
+    def _connect_signals(self) -> None:
+        """수집 완료 시그널 → 뷰 갱신 + 상태바 업데이트."""
+        sig = self.collection_signal
+        sig.news_collected.connect(self._on_news_collected)
+        sig.laws_collected.connect(self._on_laws_collected)
+        sig.support_collected.connect(self._on_support_collected)
+        sig.all_collected.connect(self._on_all_collected)
+        sig.error_occurred.connect(self._on_error)
+
+    def _on_news_collected(self, count: int) -> None:
+        self.update_status(f"뉴스 {count}건 수집 완료")
+        self._refresh_all_views()
+        if count > 0:
+            self._tray_notify("새 뉴스", f"뉴스 {count}건이 수집되었습니다.")
+
+    def _on_laws_collected(self, count: int) -> None:
+        self.update_status(f"법령 {count}건 수집 완료")
+        self._refresh_all_views()
+        if count > 0:
+            self._tray_notify("법령 업데이트", f"법령 {count}건이 수집되었습니다.")
+
+    def _on_support_collected(self, count: int) -> None:
+        self.update_status(f"지원사업 {count}건 수집 완료")
+        self._refresh_all_views()
+        if count > 0:
+            self._tray_notify("지원사업 업데이트", f"지원사업 {count}건이 수집되었습니다.")
+
+    def _on_all_collected(self, news: int, laws: int, support: int) -> None:
+        total = news + laws + support
+        self.update_status(
+            f"수집 완료 — 뉴스 {news}, 법령 {laws}, 지원사업 {support} (총 {total}건)"
+        )
+        self._refresh_all_views()
+        if total > 0:
+            self._tray_notify(
+                "데이터 수집 완료",
+                f"뉴스 {news}건, 법령 {laws}건, 지원사업 {support}건",
+            )
+
+    def _on_error(self, message: str) -> None:
+        self.update_status(f"오류: {message}")
+        logger.warning("수집 오류 시그널: %s", message)
+
+    def _refresh_all_views(self) -> None:
+        """refresh_data() 메서드가 있는 모든 뷰를 갱신한다."""
+        for i in range(self._stack.count()):
+            widget = self._stack.widget(i)
+            if hasattr(widget, "refresh_data"):
+                try:
+                    widget.refresh_data()
+                except Exception:
+                    logger.exception("뷰 갱신 실패: %s", widget.objectName())
+
+    # ------------------------------------------------------------------
+    # 시스템 트레이
+    # ------------------------------------------------------------------
+    def _setup_tray(self) -> None:
+        """시스템 트레이 아이콘 및 메뉴를 설정한다."""
+        self._tray_icon = QSystemTrayIcon(self)
+        self._tray_icon.setIcon(self._create_app_icon())
+        self._tray_icon.setToolTip(self._config.name)
+
+        # 트레이 메뉴
+        tray_menu = QMenu()
+        show_action = tray_menu.addAction("열기")
+        show_action.triggered.connect(self._show_from_tray)
+
+        refresh_action = tray_menu.addAction("지금 업데이트")
+        refresh_action.triggered.connect(self._manual_refresh)
+
+        tray_menu.addSeparator()
+        quit_action = tray_menu.addAction("종료")
+        quit_action.triggered.connect(self.close)
+
+        self._tray_icon.setContextMenu(tray_menu)
+        self._tray_icon.activated.connect(self._on_tray_activated)
+        self._tray_icon.show()
+
+    def _create_app_icon(self) -> QIcon:
+        """간단한 원형 앱 아이콘을 프로그래밍으로 생성한다."""
+        size = 64
+        pixmap = QPixmap(size, size)
+        pixmap.fill(QColor(0, 0, 0, 0))
+
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # 파란 원
+        painter.setBrush(QColor("#1565C0"))
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.drawEllipse(4, 4, size - 8, size - 8)
+
+        # 흰색 'M' 텍스트
+        painter.setPen(QColor("white"))
+        font = QFont("Segoe UI", 24, QFont.Weight.Bold)
+        painter.setFont(font)
+        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "M")
+
+        painter.end()
+        return QIcon(pixmap)
+
+    def _tray_notify(self, title: str, message: str) -> None:
+        """시스템 트레이 토스트 알림을 표시한다."""
+        if self._tray_icon.isSystemTrayAvailable():
+            self._tray_icon.showMessage(
+                title, message,
+                QSystemTrayIcon.MessageIcon.Information,
+                5000,
+            )
+
+    def _on_tray_activated(self, reason: QSystemTrayIcon.ActivationReason) -> None:
+        if reason == QSystemTrayIcon.ActivationReason.DoubleClick:
+            self._show_from_tray()
+
+    def _show_from_tray(self) -> None:
+        """트레이에서 창을 복원한다."""
+        self.showNormal()
+        self.activateWindow()
+        self.raise_()
+
+    # ------------------------------------------------------------------
+    # 스케줄러 연동
+    # ------------------------------------------------------------------
+    def set_scheduler(self, scheduler: CollectorScheduler) -> None:
+        """스케줄러 참조를 저장한다 (수동 새로고침용)."""
+        self._scheduler = scheduler
+
+    def _manual_refresh(self) -> None:
+        """사용자가 수동으로 데이터를 새로고침한다."""
+        self.update_status("수동 수집 시작...")
+        if self._scheduler:
+            t = threading.Thread(target=self._scheduler.run_once, daemon=True)
+            t.start()
+        else:
+            self._refresh_all_views()
+            self.update_status("뷰 갱신 완료")
+
+    def _export_data(self) -> None:
+        """데이터를 Excel 파일로 내보낸다."""
+        from app.services.export_service import ExportService
+        try:
+            path = ExportService.export_all()
+            self.update_status(f"내보내기 완료: {path}")
+            self._tray_notify("내보내기 완료", f"파일 저장: {path}")
+        except Exception as e:
+            self.update_status(f"내보내기 실패: {e}")
+            logger.exception("내보내기 실패")
+
+    # ------------------------------------------------------------------
     # 사이드바
     # ------------------------------------------------------------------
     def _build_sidebar(self) -> QWidget:
@@ -221,12 +377,32 @@ class MainWindow(QMainWindow):
 
         app_icon = QLabel("🌏")
         app_icon.setStyleSheet("font-size: 20px;")
-        app_name = QLabel(self._config.name)
-        app_name.setStyleSheet("font-size: 14px; font-weight: bold; color: #1A1A1A;")
+        self._app_name_label = QLabel(tr("app_name"))
+        self._app_name_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #1A1A1A;")
 
         brand_layout.addWidget(app_icon)
-        brand_layout.addWidget(app_name)
+        brand_layout.addWidget(self._app_name_label)
         brand_layout.addStretch()
+
+        # 새로고침 버튼
+        refresh_btn = QPushButton("🔄")
+        refresh_btn.setFixedSize(28, 28)
+        refresh_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        refresh_btn.setToolTip("데이터 새로고침")
+        refresh_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent;
+                border: none;
+                border-radius: 4px;
+                font-size: 14px;
+            }}
+            QPushButton:hover {{
+                background: {C_ITEM_HOVER};
+            }}
+        """)
+        refresh_btn.clicked.connect(self._manual_refresh)
+        brand_layout.addWidget(refresh_btn)
+
         layout.addWidget(brand)
 
         # 구분선
@@ -239,18 +415,21 @@ class MainWindow(QMainWindow):
         menu_layout.setContentsMargins(8, 8, 8, 8)
         menu_layout.setSpacing(1)
 
+        self._section_labels: list[tuple[str, QLabel]] = []  # (i18n_key, widget)
+
         for group in _MENU_GROUPS:
-            if group["label"]:
-                section_label = QLabel(group["label"].upper())
+            if group["label_key"]:
+                section_label = QLabel(tr(group["label_key"]).upper())
                 section_label.setStyleSheet(
                     f"color: {C_SECTION_LABEL}; font-size: 10px; "
                     "font-weight: bold; letter-spacing: 0.8px;"
                     "padding: 12px 8px 4px 8px;"
                 )
+                self._section_labels.append((group["label_key"], section_label))
                 menu_layout.addWidget(section_label)
 
-            for icon, label, key in group["items"]:
-                btn = NavButton(icon, label)
+            for icon, i18n_key, key in group["items"]:
+                btn = NavButton(icon, tr(i18n_key))
                 btn.clicked.connect(lambda _, k=key: self._navigate_to(k))
                 self._nav_buttons[key] = btn
                 menu_layout.addWidget(btn)
@@ -273,15 +452,15 @@ class MainWindow(QMainWindow):
         bottom_layout.setContentsMargins(8, 6, 8, 12)
         bottom_layout.setSpacing(2)
 
-        for icon, label, key in _BOTTOM_ITEMS:
-            btn = NavButton(icon, label)
+        for icon, i18n_key, key in _BOTTOM_ITEMS:
+            btn = NavButton(icon, tr(i18n_key))
             btn.clicked.connect(lambda _, k=key: self._navigate_to(k))
             self._nav_buttons[key] = btn
             bottom_layout.addWidget(btn)
 
         layout.addWidget(bottom_widget)
 
-        # ── 사용자 언어 버튼 ───────────────────────────────────────
+        # ── 언어 선택 콤보 ───────────────────────────────────────
         lang_widget = QWidget()
         lang_widget.setStyleSheet(
             f"background: {C_SIDEBAR_BG}; border-top: 1px solid {C_DIVIDER};"
@@ -289,9 +468,10 @@ class MainWindow(QMainWindow):
         lang_layout = QHBoxLayout(lang_widget)
         lang_layout.setContentsMargins(12, 8, 12, 12)
 
-        self._lang_btn = QPushButton("🌐 한국어")
-        self._lang_btn.setStyleSheet(f"""
-            QPushButton {{
+        from PyQt6.QtWidgets import QComboBox
+        self._lang_combo = QComboBox()
+        self._lang_combo.setStyleSheet(f"""
+            QComboBox {{
                 background: {C_ITEM_DEFAULT};
                 border: 1px solid {C_DIVIDER};
                 border-radius: 6px;
@@ -299,9 +479,18 @@ class MainWindow(QMainWindow):
                 color: #555;
                 font-size: 12px;
             }}
-            QPushButton:hover {{ background: {C_ITEM_HOVER}; }}
+            QComboBox:hover {{ background: {C_ITEM_HOVER}; }}
         """)
-        lang_layout.addWidget(self._lang_btn)
+        for code, display in get_supported_languages():
+            self._lang_combo.addItem(f"🌐 {display}", code)
+        # 현재 언어 설정
+        current = get_language()
+        for i in range(self._lang_combo.count()):
+            if self._lang_combo.itemData(i) == current:
+                self._lang_combo.setCurrentIndex(i)
+                break
+        self._lang_combo.currentIndexChanged.connect(self._on_language_changed)
+        lang_layout.addWidget(self._lang_combo)
         layout.addWidget(lang_widget)
 
         return sidebar
@@ -322,12 +511,18 @@ class MainWindow(QMainWindow):
         # 뷰 매핑: key → 실제 뷰 위젯 (없으면 플레이스홀더)
         _view_map = {
             "dashboard": DashboardView,
+            "visa": VisaAreaView,
+            "health": HealthAreaView,
+            "family": FamilyAreaView,
+            "education": EducationAreaView,
+            "job": JobAreaView,
             "news": NewsView,
             "law": LawView,
             "support": SupportView,
             "search": SearchView,
             "bookmark": BookmarkView,
             "settings": SettingsView,
+            "help": HelpView,
         }
 
         for key in _ALL_KEYS:
@@ -344,6 +539,11 @@ class MainWindow(QMainWindow):
                 view.setStyleSheet("color: #BDBDBD; font-size: 18px;")
             view.setObjectName(f"view_{key}")
             self._stack.addWidget(view)
+
+            # 설정 뷰 시그널 연결
+            if key == "settings" and hasattr(view, "refresh_requested"):
+                view.refresh_requested.connect(self._manual_refresh)
+                view.export_requested.connect(self._export_data)
 
         layout.addWidget(self._stack)
         return container
@@ -376,5 +576,39 @@ class MainWindow(QMainWindow):
         self._current_key = key
         self._stack.setCurrentIndex(_ALL_KEYS.index(key))
 
+    def _on_language_changed(self, index: int) -> None:
+        """언어 콤보박스 변경 시 UI 언어를 전환한다."""
+        code = self._lang_combo.itemData(index)
+        if code and code != get_language():
+            set_language(code)
+            self._update_ui_language()
+
+    def _update_ui_language(self) -> None:
+        """현재 언어로 사이드바 텍스트를 갱신한다."""
+        self._app_name_label.setText(tr("app_name"))
+
+        # 섹션 라벨 갱신
+        for i18n_key, label_widget in self._section_labels:
+            label_widget.setText(tr(i18n_key).upper())
+
+        # 네비 버튼 텍스트 갱신 — key로 i18n_key 매핑
+        _key_to_i18n = {}
+        for group in _MENU_GROUPS:
+            for icon, i18n_key, nav_key in group["items"]:
+                _key_to_i18n[nav_key] = (icon, i18n_key)
+        for icon, i18n_key, nav_key in _BOTTOM_ITEMS:
+            _key_to_i18n[nav_key] = (icon, i18n_key)
+
+        for nav_key, btn in self._nav_buttons.items():
+            if nav_key in _key_to_i18n:
+                icon, i18n_key = _key_to_i18n[nav_key]
+                btn.setText(f"  {icon}  {tr(i18n_key)}")
+
     def update_status(self, message: str) -> None:
         self._status_bar.showMessage(message)
+
+    def closeEvent(self, event) -> None:
+        """종료 시 트레이 아이콘 정리."""
+        if hasattr(self, "_tray_icon"):
+            self._tray_icon.hide()
+        super().closeEvent(event)

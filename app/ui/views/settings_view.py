@@ -4,14 +4,18 @@ from __future__ import annotations
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QScrollArea, QFrame,
     QHBoxLayout, QComboBox, QCheckBox, QSpinBox, QPushButton,
-    QGroupBox, QFormLayout,
+    QGroupBox, QFormLayout, QMessageBox,
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 
 from app.ui.styles import COLORS
 
 
 class SettingsView(QWidget):
+    # 외부(MainWindow)에서 연결할 시그널
+    refresh_requested = pyqtSignal()
+    export_requested = pyqtSignal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._build_ui()
@@ -169,9 +173,9 @@ class SettingsView(QWidget):
         layout = QVBoxLayout(group)
         layout.setSpacing(8)
 
-        info = QLabel("데이터베이스: data/michub.db")
-        info.setStyleSheet("color: #757575; font-size: 12px;")
-        layout.addWidget(info)
+        self._db_info = QLabel("데이터베이스: data/michub.db")
+        self._db_info.setStyleSheet("color: #757575; font-size: 12px;")
+        layout.addWidget(self._db_info)
 
         row = QHBoxLayout()
 
@@ -181,6 +185,7 @@ class SettingsView(QWidget):
             " border-radius: 6px; padding: 8px 16px; }"
             "QPushButton:hover { background: #0D47A1; }"
         )
+        refresh_btn.clicked.connect(self._on_refresh)
         row.addWidget(refresh_btn)
 
         export_btn = QPushButton("📥 데이터 내보내기")
@@ -189,6 +194,7 @@ class SettingsView(QWidget):
             " border-radius: 6px; padding: 8px 16px; }"
             "QPushButton:hover { background: #E3F2FD; }"
         )
+        export_btn.clicked.connect(self._on_export)
         row.addWidget(export_btn)
 
         clear_btn = QPushButton("🗑️ 전체 초기화")
@@ -197,6 +203,7 @@ class SettingsView(QWidget):
             " border-radius: 6px; padding: 8px 16px; }"
             "QPushButton:hover { background: #FFEBEE; }"
         )
+        clear_btn.clicked.connect(self._on_clear)
         row.addWidget(clear_btn)
 
         row.addStretch()
@@ -221,3 +228,46 @@ class SettingsView(QWidget):
         layout.addWidget(about)
 
         return group
+
+    # -- 버튼 핸들러 --
+
+    def _on_refresh(self) -> None:
+        self._db_info.setText("수동 업데이트 요청 중...")
+        self.refresh_requested.emit()
+
+    def _on_export(self) -> None:
+        self.export_requested.emit()
+
+    def _on_clear(self) -> None:
+        reply = QMessageBox.question(
+            self, "데이터 초기화",
+            "정말로 모든 수집 데이터를 삭제하시겠습니까?\n(북마크 포함 전체 삭제)",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            self._clear_database()
+
+    def _clear_database(self) -> None:
+        """DB의 모든 데이터를 삭제한다."""
+        from app.models.database import get_session
+        from app.models.news import News
+        from app.models.law import Law
+        from app.models.support import SupportProgram
+
+        session_gen = get_session()
+        session = next(session_gen)
+        try:
+            session.query(News).delete()
+            session.query(Law).delete()
+            session.query(SupportProgram).delete()
+            session.commit()
+            self._db_info.setText("데이터가 초기화되었습니다.")
+        except Exception as e:
+            session.rollback()
+            self._db_info.setText(f"초기화 실패: {e}")
+        finally:
+            try:
+                next(session_gen)
+            except StopIteration:
+                pass

@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from app.ui.mock_data import MOCK_LAWS
+from app.services.data_provider import DataProvider
 from app.ui.widgets.search_bar import SearchBar
 from app.ui.widgets.filter_bar import FilterBar
 from app.ui.widgets.item_card import LawCard
@@ -16,7 +16,7 @@ from app.ui.widgets.detail_panel import DetailPanel
 class LawView(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._data = list(MOCK_LAWS)
+        self._data = DataProvider.get_all_laws()
         self._build_ui()
         self._populate_list()
 
@@ -81,24 +81,41 @@ class LawView(QWidget):
             for item in data:
                 card = LawCard(item)
                 card.clicked.connect(self._show_detail)
+                card.bookmark_toggled.connect(self._on_bookmark)
                 self._list_layout.addWidget(card)
 
         self._list_layout.addStretch()
+
+    def _on_bookmark(self, item_id: int, _new_state: bool) -> None:
+        DataProvider.toggle_bookmark("law", item_id)
 
     def _show_detail(self, item_id: int) -> None:
         item = next((l for l in self._data if l["id"] == item_id), None)
         if not item:
             return
+        # AI 요약 (로컬 폴백)
+        summary = item.get("summary", "")
+        if not summary and item.get("content"):
+            from app.services.ai_summary import AISummaryService
+            from app.utils.config_loader import load_config
+            svc = AISummaryService(load_config())
+            summary = svc.summarize_law(item["name"], item["content"])
+        meta = [
+            f"📂 {item['category']}  ·  법령코드: {item['law_code']}",
+            f"📅 개정: {item['amended_date']}  ·  시행: {item['effective_date']}",
+        ]
+        if summary:
+            meta.append("")
+            meta.append(f"💡 AI 요약: {summary}")
         self._detail.show_detail(
             title=item["name"],
-            meta_lines=[
-                f"📂 {item['category']}  ·  법령코드: {item['law_code']}",
-                f"📅 개정: {item['amended_date']}  ·  시행: {item['effective_date']}",
-                f"",
-                f"💡 AI 요약: {item['summary']}",
-            ],
+            meta_lines=meta,
             body=item["content"],
         )
+
+    def refresh_data(self) -> None:
+        self._data = DataProvider.get_all_laws()
+        self._populate_list()
 
     def _on_search(self, text: str) -> None:
         t = text.lower()

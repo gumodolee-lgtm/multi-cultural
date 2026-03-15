@@ -37,6 +37,7 @@ class AppConfig:
     news_max_days: int = 90
     # API 키 (환경 변수에서)
     public_data_api_key: str = ""
+    multicultural_survey_api_key: str = ""
     law_api_key: str = ""
     deepl_api_key: str = ""
     anthropic_api_key: str = ""
@@ -89,6 +90,7 @@ def load_config(config_path: Path | None = None) -> AppConfig:
         news_max_days=news_raw.get("max_days", 90),
         # 환경 변수에서 API 정보 로드
         public_data_api_key=os.getenv("PUBLIC_DATA_API_KEY", ""),
+        multicultural_survey_api_key=os.getenv("MULTICULTURAL_SURVEY_API_KEY", ""),
         law_api_key=os.getenv("LAW_API_OC", "test"),   # 기본값 test (법제처 OC 파라미터)
         deepl_api_key=os.getenv("DEEPL_API_KEY", ""),
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),

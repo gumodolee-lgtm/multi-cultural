@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from app.ui.mock_data import MOCK_NEWS
+from app.services.data_provider import DataProvider
 from app.ui.widgets.search_bar import SearchBar
 from app.ui.widgets.filter_bar import FilterBar
 from app.ui.widgets.item_card import NewsCard
@@ -18,7 +18,7 @@ from app.ui.widgets.detail_panel import DetailPanel
 class NewsView(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._data = list(MOCK_NEWS)
+        self._data = DataProvider.get_all_news()
         self._build_ui()
         self._populate_list()
 
@@ -89,6 +89,7 @@ class NewsView(QWidget):
             for item in data:
                 card = NewsCard(item)
                 card.clicked.connect(self._show_detail)
+                card.bookmark_toggled.connect(self._on_bookmark)
                 self._list_layout.addWidget(card)
 
         self._list_layout.addStretch()
@@ -97,19 +98,38 @@ class NewsView(QWidget):
         item = next((n for n in self._data if n["id"] == item_id), None)
         if not item:
             return
+        # AI 요약 (로컬 폴백)
+        summary = item.get("summary", "")
+        if not summary and item.get("content"):
+            from app.services.ai_summary import AISummaryService
+            from app.utils.config_loader import load_config
+            svc = AISummaryService(load_config())
+            summary = svc.summarize_news(item["title"], item["content"])
+        meta = [
+            f"📰 {item['source']}  ·  {item['category']}",
+            f"📅 {item['published']}",
+        ]
+        if summary:
+            meta.append("")
+            meta.append(f"💡 AI 요약: {summary}")
         self._detail.show_detail(
             title=item["title"],
-            meta_lines=[
-                f"📰 {item['source']}  ·  {item['category']}",
-                f"📅 {item['published']}",
-            ],
+            meta_lines=meta,
             body=item["content"],
             url=item.get("url", ""),
         )
 
+    def refresh_data(self) -> None:
+        """데이터를 DB에서 다시 읽어 목록을 갱신한다."""
+        self._data = DataProvider.get_all_news()
+        self._populate_list()
+
     def _on_search(self, text: str) -> None:
         filtered = [n for n in self._data if text.lower() in n["title"].lower() or text in n.get("content", "")]
         self._populate_list(filtered)
+
+    def _on_bookmark(self, item_id: int, _new_state: bool) -> None:
+        DataProvider.toggle_bookmark("news", item_id)
 
     def _on_filter(self) -> None:
         vals = self._filter.get_values()

@@ -36,6 +36,9 @@ APScheduler>=3.10.0
 openpyxl>=3.1.0            # Excel 저장
 reportlab>=4.0.0            # PDF 저장
 
+# PDF 파싱 (다문화가족지원센터 현황 PDF)
+pdfplumber>=0.10.0
+
 # AI 요약 (선택 — API 키 필요)
 # anthropic>=0.30.0
 

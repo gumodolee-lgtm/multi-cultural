@@ -6,12 +6,23 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from app.ui.mock_data import MOCK_NEWS, MOCK_LAWS, MOCK_SUPPORT
+from app.services.data_provider import DataProvider
 
 
 class BookmarkView(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._build_ui()
+
+    def refresh_data(self) -> None:
+        """북마크 데이터를 다시 읽어 뷰를 갱신한다."""
+        if self.layout():
+            while self.layout().count():
+                child = self.layout().takeAt(0)
+                if child.widget():
+                    child.widget().deleteLater()
+        else:
+            QVBoxLayout(self)
         self._build_ui()
 
     def _build_ui(self) -> None:
@@ -29,9 +40,12 @@ class BookmarkView(QWidget):
         header.setStyleSheet("font-size: 18px; font-weight: bold;")
         header_layout.addWidget(header)
 
-        bookmarked_news = [n for n in MOCK_NEWS if n.get("is_bookmarked")]
-        bookmarked_laws = [l for l in MOCK_LAWS if l.get("is_bookmarked")]
-        bookmarked_support = [s for s in MOCK_SUPPORT if s.get("is_bookmarked")]
+        all_news = DataProvider.get_all_news()
+        all_laws = DataProvider.get_all_laws()
+        all_support = DataProvider.get_all_support()
+        bookmarked_news = [n for n in all_news if n.get("is_bookmarked")]
+        bookmarked_laws = [l for l in all_laws if l.get("is_bookmarked")]
+        bookmarked_support = [s for s in all_support if s.get("is_bookmarked")]
         total = len(bookmarked_news) + len(bookmarked_laws) + len(bookmarked_support)
 
         count = QLabel(f"총 {total}개 항목이 저장되어 있습니다")

@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from app.ui.mock_data import MOCK_NEWS, MOCK_LAWS, MOCK_SUPPORT
+from app.services.data_provider import DataProvider
 from app.ui.widgets.search_bar import SearchBar
 from app.ui.styles import COLORS
 
@@ -83,12 +83,13 @@ class SearchView(QWidget):
         self._clear_results()
         t = text.lower()
 
-        # 뉴스 검색
-        news_results = [n for n in MOCK_NEWS if t in n["title"].lower() or t in n.get("content", "").lower()]
-        # 법령 검색
-        law_results = [l for l in MOCK_LAWS if t in l["name"].lower() or t in l.get("content", "").lower()]
-        # 지원사업 검색
-        support_results = [s for s in MOCK_SUPPORT if t in s["name"].lower() or t in s.get("description", "").lower()]
+        # DB에서 검색
+        all_news = DataProvider.get_all_news()
+        all_laws = DataProvider.get_all_laws()
+        all_support = DataProvider.get_all_support()
+        news_results = [n for n in all_news if t in n["title"].lower() or t in n.get("content", "").lower()]
+        law_results = [l for l in all_laws if t in l["name"].lower() or t in l.get("content", "").lower()]
+        support_results = [s for s in all_support if t in s["name"].lower() or t in s.get("description", "").lower()]
 
         total = len(news_results) + len(law_results) + len(support_results)
         summary = QLabel(f"'{text}' 검색 결과: 총 {total}건")
