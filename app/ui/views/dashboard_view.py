@@ -11,6 +11,7 @@ from PyQt6.QtCore import Qt
 from app.services.data_provider import DataProvider
 from app.ui.styles import COLORS
 from app.ui.widgets.detail_dialog import DetailDialog
+from app.utils.i18n import tr
 
 
 class DashboardView(QWidget):
@@ -34,11 +35,11 @@ class DashboardView(QWidget):
         layout.setSpacing(20)
 
         # 환영 메시지
-        welcome = QLabel("📋 대시보드")
+        welcome = QLabel(tr("dashboard_title"))
         welcome.setStyleSheet("font-size: 22px; font-weight: bold; color: #212121;")
         layout.addWidget(welcome)
 
-        sub = QLabel(f"마지막 업데이트: {stats['last_update']}")
+        sub = QLabel(f"{tr('last_update')}: {stats['last_update']}")
         sub.setStyleSheet("color: #9E9E9E; font-size: 12px;")
         layout.addWidget(sub)
 
@@ -46,12 +47,12 @@ class DashboardView(QWidget):
         kpi_row = QHBoxLayout()
         kpi_row.setSpacing(16)
         kpi_data = [
-            ("📰", "수집 뉴스", str(stats["news_count"]), COLORS["primary"]),
-            ("⚖️", "주요 법령", str(stats["law_count"]), "#2E7D32"),
-            ("🏛️", "지원사업", str(stats["support_count"]), COLORS["accent"]),
-            ("🔔", "오늘 뉴스", str(stats["today_news"]), COLORS["danger"]),
-            ("⏰", "마감 임박", str(stats["closing_soon"]), "#7B1FA2"),
-            ("⭐", "북마크", str(stats["bookmarked"]), COLORS["bookmark"]),
+            ("📰", tr("collected_news"), str(stats["news_count"]), COLORS["primary"]),
+            ("⚖️", tr("major_laws"), str(stats["law_count"]), "#2E7D32"),
+            ("🏛️", tr("support_programs"), str(stats["support_count"]), COLORS["accent"]),
+            ("🔔", tr("today_news"), str(stats["today_news"]), COLORS["danger"]),
+            ("⏰", tr("closing_soon"), str(stats["closing_soon"]), "#7B1FA2"),
+            ("⭐", tr("bookmarked"), str(stats["bookmarked"]), COLORS["bookmark"]),
         ]
         for icon, label, value, color in kpi_data:
             card = self._make_kpi_card(icon, label, value, color)
@@ -59,12 +60,12 @@ class DashboardView(QWidget):
         layout.addLayout(kpi_row)
 
         # 오늘의 주요 뉴스
-        layout.addWidget(self._section_title("📰 최근 뉴스"))
+        layout.addWidget(self._section_title(tr("recent_news")))
         for news in all_news[:3]:
             layout.addWidget(self._news_item(news))
 
         # 마감 임박 지원사업
-        layout.addWidget(self._section_title("⏰ 마감 임박 지원사업"))
+        layout.addWidget(self._section_title(tr("closing_support")))
         today_str = datetime.now().strftime("%Y-%m-%d")
         closing = [s for s in all_support if s.get("apply_end", "") >= today_str]
         closing.sort(key=lambda s: s.get("apply_end", "9999"))
@@ -185,7 +186,7 @@ class DashboardView(QWidget):
         try:
             end = datetime.strptime(data.get("apply_end", ""), "%Y-%m-%d")
             diff = (end - datetime.now()).days
-            d_day = f"D-{diff}" if diff >= 0 else "마감"
+            d_day = f"D-{diff}" if diff >= 0 else tr("deadline")
         except ValueError:
             pass
 

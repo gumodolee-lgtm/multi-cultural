@@ -11,6 +11,7 @@ from app.ui.widgets.search_bar import SearchBar
 from app.ui.widgets.filter_bar import FilterBar
 from app.ui.widgets.item_card import LawCard
 from app.ui.widgets.detail_panel import DetailPanel
+from app.utils.i18n import tr
 
 
 class LawView(QWidget):
@@ -32,7 +33,7 @@ class LawView(QWidget):
         top_layout.setContentsMargins(16, 12, 16, 12)
         top_layout.setSpacing(8)
 
-        header = QLabel("⚖️ 법령")
+        header = QLabel(f"⚖️ {tr('law')}")
         header.setStyleSheet("font-size: 18px; font-weight: bold;")
         top_layout.addWidget(header)
 
@@ -73,7 +74,7 @@ class LawView(QWidget):
 
         data = items if items is not None else self._data
         if not data:
-            empty = QLabel("검색 결과가 없습니다.")
+            empty = QLabel(tr("no_results"))
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setStyleSheet("color: #9E9E9E; padding: 40px;")
             self._list_layout.addWidget(empty)

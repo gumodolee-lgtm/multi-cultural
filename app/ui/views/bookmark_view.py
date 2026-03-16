@@ -8,6 +8,7 @@ from PyQt6.QtCore import Qt
 
 from app.services.data_provider import DataProvider
 from app.ui.widgets.detail_dialog import DetailDialog
+from app.utils.i18n import tr
 
 
 class BookmarkView(QWidget):
@@ -37,7 +38,7 @@ class BookmarkView(QWidget):
         header_layout = QVBoxLayout(header_w)
         header_layout.setContentsMargins(24, 16, 24, 16)
 
-        header = QLabel("⭐ 북마크")
+        header = QLabel(tr("bookmark_title"))
         header.setStyleSheet("font-size: 18px; font-weight: bold;")
         header_layout.addWidget(header)
 
@@ -49,7 +50,7 @@ class BookmarkView(QWidget):
         bookmarked_support = [s for s in all_support if s.get("is_bookmarked")]
         total = len(bookmarked_news) + len(bookmarked_laws) + len(bookmarked_support)
 
-        count = QLabel(f"총 {total}개 항목이 저장되어 있습니다")
+        count = QLabel(tr("saved_items_count").replace("{count}", str(total)))
         count.setStyleSheet("color: #757575; font-size: 12px;")
         header_layout.addWidget(count)
         layout.addWidget(header_w)
@@ -93,7 +94,7 @@ class BookmarkView(QWidget):
         layout.setSpacing(8)
 
         if not items:
-            empty = QLabel("저장된 항목이 없습니다.")
+            empty = QLabel(tr("no_saved_items"))
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setStyleSheet("color: #9E9E9E; padding: 40px;")
             layout.addWidget(empty)

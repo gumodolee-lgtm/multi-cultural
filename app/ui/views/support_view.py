@@ -13,6 +13,7 @@ from app.ui.widgets.search_bar import SearchBar
 from app.ui.widgets.filter_bar import FilterBar
 from app.ui.widgets.item_card import SupportCard
 from app.ui.widgets.detail_panel import DetailPanel
+from app.utils.i18n import tr
 
 
 class SupportView(QWidget):
@@ -34,7 +35,7 @@ class SupportView(QWidget):
         top_layout.setContentsMargins(16, 12, 16, 12)
         top_layout.setSpacing(8)
 
-        header = QLabel("🏛️ 지원사업")
+        header = QLabel(f"🏛️ {tr('support')}")
         header.setStyleSheet("font-size: 18px; font-weight: bold;")
         top_layout.addWidget(header)
 
@@ -77,7 +78,7 @@ class SupportView(QWidget):
 
         data = items if items is not None else self._data
         if not data:
-            empty = QLabel("검색 결과가 없습니다.")
+            empty = QLabel(tr("no_results"))
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setStyleSheet("color: #9E9E9E; padding: 40px;")
             self._list_layout.addWidget(empty)

@@ -17,6 +17,7 @@ from PyQt6.QtCore import Qt
 from app.services.data_provider import DataProvider
 from app.ui.styles import COLORS
 from app.ui.widgets.detail_dialog import DetailDialog
+from app.utils.i18n import tr
 
 
 @dataclass
@@ -70,32 +71,32 @@ class LifeAreaView(QWidget):
 
         summary_row = QHBoxLayout()
         summary_row.setSpacing(12)
-        summary_row.addWidget(self._summary_card("📰", "관련 뉴스", len(news_items), COLORS["primary"]))
-        summary_row.addWidget(self._summary_card("⚖️", "관련 법령", len(law_items), "#2E7D32"))
-        summary_row.addWidget(self._summary_card("🏛️", "지원사업", len(support_items), COLORS["accent"]))
+        summary_row.addWidget(self._summary_card("📰", tr("related_news").replace("📰 ", ""), len(news_items), COLORS["primary"]))
+        summary_row.addWidget(self._summary_card("⚖️", tr("related_laws").replace("⚖️ ", ""), len(law_items), "#2E7D32"))
+        summary_row.addWidget(self._summary_card("🏛️", tr("related_support").replace("🏛️ ", ""), len(support_items), COLORS["accent"]))
         layout.addLayout(summary_row)
 
         # 뉴스 섹션
         if news_items:
-            layout.addWidget(self._section_title("📰 관련 뉴스"))
+            layout.addWidget(self._section_title(tr("related_news")))
             for item in news_items:
                 layout.addWidget(self._news_card(item))
 
         # 법령 섹션
         if law_items:
-            layout.addWidget(self._section_title("⚖️ 관련 법령"))
+            layout.addWidget(self._section_title(tr("related_laws")))
             for item in law_items:
                 layout.addWidget(self._law_card(item))
 
         # 지원사업 섹션
         if support_items:
-            layout.addWidget(self._section_title("🏛️ 관련 지원사업"))
+            layout.addWidget(self._section_title(tr("related_support")))
             for item in support_items:
                 layout.addWidget(self._support_card(item))
 
         # 데이터 없음
         if not (news_items or law_items or support_items):
-            empty = QLabel("아직 수집된 데이터가 없습니다.\n자동 수집이 시작되면 관련 정보가 여기에 표시됩니다.")
+            empty = QLabel(tr("no_data_yet"))
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setStyleSheet("color: #9E9E9E; font-size: 14px; padding: 40px;")
             layout.addWidget(empty)

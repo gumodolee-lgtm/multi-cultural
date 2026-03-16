@@ -9,6 +9,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
+from app.utils.i18n import tr
+
 
 class DetailDialog(QDialog):
     """아이템 상세 정보를 팝업으로 표시하는 대화상자."""
@@ -63,7 +65,7 @@ class DetailDialog(QDialog):
         body_layout = QVBoxLayout(body_widget)
         body_layout.setContentsMargins(0, 0, 0, 0)
 
-        lbl_body = QLabel(body if body else "(내용 없음)")
+        lbl_body = QLabel(body if body else tr("no_content"))
         lbl_body.setTextFormat(Qt.TextFormat.PlainText)
         lbl_body.setStyleSheet("color: #424242; font-size: 13px;")
         lbl_body.setWordWrap(True)
@@ -78,7 +80,7 @@ class DetailDialog(QDialog):
         btn_row.addStretch()
 
         if url:
-            link_btn = QPushButton("🔗 원문 보기")
+            link_btn = QPushButton(tr("view_source"))
             link_btn.setStyleSheet(
                 "QPushButton { background: #1565C0; color: white; border: none;"
                 " border-radius: 6px; padding: 8px 16px; }"
@@ -87,7 +89,7 @@ class DetailDialog(QDialog):
             link_btn.clicked.connect(lambda: webbrowser.open(url))
             btn_row.addWidget(link_btn)
 
-        close_btn = QPushButton("닫기")
+        close_btn = QPushButton(tr("close"))
         close_btn.setStyleSheet(
             "QPushButton { background: #E0E0E0; color: #424242; border: none;"
             " border-radius: 6px; padding: 8px 16px; }"

@@ -12,6 +12,7 @@ from app.services.data_provider import DataProvider
 from app.ui.widgets.search_bar import SearchBar
 from app.ui.styles import COLORS
 from app.ui.widgets.detail_dialog import DetailDialog
+from app.utils.i18n import tr
 
 
 class SearchView(QWidget):
@@ -31,17 +32,17 @@ class SearchView(QWidget):
         top_layout.setContentsMargins(40, 30, 40, 30)
         top_layout.setSpacing(12)
 
-        title = QLabel("🔍 통합 검색")
+        title = QLabel(tr("search_title"))
         title.setStyleSheet("color: white; font-size: 22px; font-weight: bold;")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         top_layout.addWidget(title)
 
-        desc = QLabel("뉴스, 법령, 지원사업을 한 번에 검색합니다")
+        desc = QLabel(tr("search_desc"))
         desc.setStyleSheet("color: rgba(255,255,255,0.8); font-size: 13px;")
         desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         top_layout.addWidget(desc)
 
-        self._search = SearchBar("키워드를 입력하세요...")
+        self._search = SearchBar(tr("search_placeholder"))
         self._search.searched.connect(self._on_search)
         top_layout.addWidget(self._search)
         layout.addWidget(top)
@@ -63,7 +64,7 @@ class SearchView(QWidget):
     def _show_initial(self) -> None:
         self._clear_results()
 
-        hint = QLabel("💡 인기 검색어")
+        hint = QLabel(tr("popular_keywords"))
         hint.setStyleSheet("font-size: 14px; font-weight: bold; color: #757575;")
         self._result_layout.addWidget(hint)
 
@@ -89,12 +90,12 @@ class SearchView(QWidget):
         support_results = DataProvider.search_support(keyword=text) if text.strip() else []
 
         total = len(news_results) + len(law_results) + len(support_results)
-        summary = QLabel(f"'{text}' 검색 결과: 총 {total}건")
+        summary = QLabel(f"'{text}' {tr('search_result')}: {total}")
         summary.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         self._result_layout.addWidget(summary)
 
         if total == 0:
-            empty = QLabel("검색 결과가 없습니다. 다른 키워드로 시도해 보세요.")
+            empty = QLabel(tr("no_results"))
             empty.setStyleSheet("color: #9E9E9E; padding: 40px;")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self._result_layout.addWidget(empty)
