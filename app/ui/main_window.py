@@ -165,6 +165,7 @@ class MainWindow(QMainWindow):
         # 시그널 객체 — 스케줄러와 공유
         self.collection_signal = CollectionSignal()
 
+        self._restore_saved_settings()
         self._setup_window()
         self._build_ui()
         self._setup_tray()
@@ -557,6 +558,10 @@ class MainWindow(QMainWindow):
             if key == "settings" and hasattr(view, "refresh_requested"):
                 view.refresh_requested.connect(self._manual_refresh)
                 view.export_requested.connect(self._export_data)
+                if hasattr(view, "language_changed"):
+                    view.language_changed.connect(self._on_settings_language_changed)
+                if hasattr(view, "theme_changed"):
+                    view.theme_changed.connect(self._apply_theme)
 
         layout.addWidget(self._stack)
         return container
@@ -668,9 +673,57 @@ class MainWindow(QMainWindow):
             if key == "settings" and hasattr(view, "refresh_requested"):
                 view.refresh_requested.connect(self._manual_refresh)
                 view.export_requested.connect(self._export_data)
+                if hasattr(view, "language_changed"):
+                    view.language_changed.connect(self._on_settings_language_changed)
+                if hasattr(view, "theme_changed"):
+                    view.theme_changed.connect(self._apply_theme)
 
         # 이전 탭 복원
         self._navigate_to(saved_key)
+
+    # ------------------------------------------------------------------
+    # 설정 복원 / 테마
+    # ------------------------------------------------------------------
+    def _restore_saved_settings(self) -> None:
+        """앱 시작 시 저장된 설정을 복원한다."""
+        from app.services.settings_service import get_setting
+        saved_lang = get_setting("language")
+        if saved_lang and saved_lang != get_language():
+            set_language(saved_lang)
+
+    def _on_settings_language_changed(self, code: str) -> None:
+        """설정 뷰에서 언어를 변경했을 때 사이드바 콤보와 동기화한다."""
+        if code != get_language():
+            set_language(code)
+        # 사이드바 언어 콤보 동기화 (시그널 루프 방지)
+        self._lang_combo.blockSignals(True)
+        for i in range(self._lang_combo.count()):
+            if self._lang_combo.itemData(i) == code:
+                self._lang_combo.setCurrentIndex(i)
+                break
+        self._lang_combo.blockSignals(False)
+        self._update_ui_language()
+        self._rebuild_content_views()
+
+    def _apply_theme(self, theme: str) -> None:
+        """라이트/다크 테마를 적용한다."""
+        if theme == "dark":
+            self.setStyleSheet("""
+                QMainWindow { background: #1E1E1E; }
+                QWidget { color: #E0E0E0; }
+                QLabel { color: #E0E0E0; }
+                QScrollArea { background: #252525; }
+                QFrame { background: #2D2D2D; border-color: #404040; }
+                QGroupBox { background: #2D2D2D; border-color: #404040; color: #E0E0E0; }
+                QGroupBox::title { color: #64B5F6; }
+                QComboBox { background: #353535; color: #E0E0E0; border-color: #505050; }
+                QSpinBox { background: #353535; color: #E0E0E0; border-color: #505050; }
+                QCheckBox { color: #E0E0E0; }
+                QLineEdit { background: #353535; color: #E0E0E0; border-color: #505050; }
+                QStatusBar { background: #1E1E1E; color: #888; border-top: 1px solid #404040; }
+            """)
+        else:
+            self.setStyleSheet(f"QMainWindow {{ background: {C_CONTENT_BG}; }}")
 
     def update_status(self, message: str) -> None:
         self._status_bar.showMessage(message)

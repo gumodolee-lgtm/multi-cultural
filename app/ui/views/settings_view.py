@@ -1,4 +1,4 @@
-"""설정 뷰 — 언어, 알림, 업데이트 주기, 데이터 관리"""
+"""설정 뷰 — 언어, 알림, 업데이트 주기, 데이터 관리 (영구 저장)"""
 from __future__ import annotations
 
 from PyQt6.QtWidgets import (
@@ -8,14 +8,33 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 
+from app.services.settings_service import get_setting, set_setting
 from app.ui.styles import COLORS
 from app.utils.i18n import tr
+
+# 언어 코드 ↔ 콤보박스 인덱스 매핑
+_LANG_CODES = ["ko", "en", "vi", "zh"]
+_LANG_LABELS = ["한국어", "English", "Tiếng Việt", "中文"]
+
+# 테마 코드 ↔ 인덱스
+_THEME_CODES = ["light", "dark"]
+
+# 글자 크기 옵션
+_FONT_SIZES = ["11pt", "13pt", "16pt"]
+
+# 지역 옵션
+_REGIONS = [
+    "전국", "서울", "경기", "인천", "부산", "대구", "광주", "대전", "울산", "세종",
+    "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주",
+]
 
 
 class SettingsView(QWidget):
     # 외부(MainWindow)에서 연결할 시그널
     refresh_requested = pyqtSignal()
     export_requested = pyqtSignal()
+    language_changed = pyqtSignal(str)   # 언어 변경 시 코드 전달
+    theme_changed = pyqtSignal(str)      # 테마 변경 시 코드 전달
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -79,53 +98,76 @@ class SettingsView(QWidget):
         """)
         return group
 
+    # ------------------------------------------------------------------
+    # 1. 일반 설정
+    # ------------------------------------------------------------------
     def _build_general_group(self) -> QGroupBox:
         group = self._make_group(tr("general"))
         form = QFormLayout(group)
         form.setSpacing(12)
 
         # 언어
-        lang = QComboBox()
-        lang.addItems(["한국어", "English", "Tiếng Việt", "中文"])
-        lang.setMinimumWidth(200)
-        form.addRow(tr("interface_lang"), lang)
+        self._lang_combo = QComboBox()
+        self._lang_combo.addItems(_LANG_LABELS)
+        saved_lang = get_setting("language")
+        if saved_lang in _LANG_CODES:
+            self._lang_combo.setCurrentIndex(_LANG_CODES.index(saved_lang))
+        self._lang_combo.setMinimumWidth(200)
+        self._lang_combo.currentIndexChanged.connect(self._on_lang_changed)
+        form.addRow(tr("interface_lang"), self._lang_combo)
 
         # 테마
-        theme = QComboBox()
-        theme.addItems([tr("theme_light"), tr("theme_dark"), tr("theme_system")])
-        theme.setMinimumWidth(200)
-        form.addRow(tr("theme"), theme)
+        self._theme_combo = QComboBox()
+        self._theme_combo.addItems([tr("theme_light"), tr("theme_dark")])
+        saved_theme = get_setting("theme")
+        if saved_theme in _THEME_CODES:
+            self._theme_combo.setCurrentIndex(_THEME_CODES.index(saved_theme))
+        self._theme_combo.setMinimumWidth(200)
+        self._theme_combo.currentIndexChanged.connect(self._on_theme_changed)
+        form.addRow(tr("theme"), self._theme_combo)
 
         # 글자 크기
-        font_size = QComboBox()
-        font_size.addItems(["11pt", "13pt", "16pt"])
-        font_size.setCurrentIndex(1)
-        font_size.setMinimumWidth(200)
-        form.addRow(tr("font_size"), font_size)
+        self._font_combo = QComboBox()
+        self._font_combo.addItems(_FONT_SIZES)
+        saved_font = get_setting("font_size")
+        if saved_font in _FONT_SIZES:
+            self._font_combo.setCurrentIndex(_FONT_SIZES.index(saved_font))
+        self._font_combo.setMinimumWidth(200)
+        self._font_combo.currentIndexChanged.connect(self._on_font_changed)
+        form.addRow(tr("font_size"), self._font_combo)
 
         # 기본 지역
-        region = QComboBox()
-        region.addItems(["전국", "서울", "경기", "인천", "부산", "대구", "광주", "대전", "울산", "세종",
-                        "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"])
-        region.setMinimumWidth(200)
-        form.addRow(tr("default_region"), region)
+        self._region_combo = QComboBox()
+        self._region_combo.addItems(_REGIONS)
+        saved_region = get_setting("default_region")
+        if saved_region in _REGIONS:
+            self._region_combo.setCurrentIndex(_REGIONS.index(saved_region))
+        self._region_combo.setMinimumWidth(200)
+        self._region_combo.currentIndexChanged.connect(self._on_region_changed)
+        form.addRow(tr("default_region"), self._region_combo)
 
         return group
 
+    # ------------------------------------------------------------------
+    # 2. 알림 설정
+    # ------------------------------------------------------------------
     def _build_notification_group(self) -> QGroupBox:
         group = self._make_group(tr("notifications"))
         layout = QVBoxLayout(group)
         layout.setSpacing(8)
 
-        checks = [
-            (tr("notify_law"), True),
-            (tr("notify_news"), True),
-            (tr("notify_support_deadline"), True),
-            (tr("notify_keyword"), False),
+        self._notify_checks = {}
+        notify_keys = [
+            ("notify_law", tr("notify_law")),
+            ("notify_news", tr("notify_news")),
+            ("notify_support_deadline", tr("notify_support_deadline")),
+            ("notify_keyword", tr("notify_keyword")),
         ]
-        for text, checked in checks:
+        for key, text in notify_keys:
             cb = QCheckBox(text)
-            cb.setChecked(checked)
+            cb.setChecked(get_setting(key) == "true")
+            cb.stateChanged.connect(lambda state, k=key: self._on_notify_changed(k, state))
+            self._notify_checks[key] = cb
             layout.addWidget(cb)
 
         edit_btn = QPushButton(tr("manage_keywords"))
@@ -135,35 +177,51 @@ class SettingsView(QWidget):
             "QPushButton:hover { background: #E3F2FD; }"
         )
         edit_btn.setFixedWidth(140)
+        edit_btn.clicked.connect(self._on_manage_keywords)
         layout.addWidget(edit_btn)
 
         return group
 
+    # ------------------------------------------------------------------
+    # 3. 업데이트 주기
+    # ------------------------------------------------------------------
     def _build_scheduler_group(self) -> QGroupBox:
         group = self._make_group(tr("auto_update"))
         form = QFormLayout(group)
         form.setSpacing(12)
 
-        news_spin = QSpinBox()
-        news_spin.setRange(15, 360)
-        news_spin.setValue(60)
-        news_spin.setSuffix(tr("minutes"))
-        form.addRow(tr("news_interval"), news_spin)
+        self._news_spin = QSpinBox()
+        self._news_spin.setRange(15, 360)
+        self._news_spin.setValue(int(get_setting("news_interval_min")))
+        self._news_spin.setSuffix(tr("minutes"))
+        self._news_spin.valueChanged.connect(
+            lambda v: set_setting("news_interval_min", str(v))
+        )
+        form.addRow(tr("news_interval"), self._news_spin)
 
-        law_spin = QSpinBox()
-        law_spin.setRange(1, 72)
-        law_spin.setValue(24)
-        law_spin.setSuffix(tr("hours"))
-        form.addRow(tr("law_interval"), law_spin)
+        self._law_spin = QSpinBox()
+        self._law_spin.setRange(1, 72)
+        self._law_spin.setValue(int(get_setting("law_interval_hr")))
+        self._law_spin.setSuffix(tr("hours"))
+        self._law_spin.valueChanged.connect(
+            lambda v: set_setting("law_interval_hr", str(v))
+        )
+        form.addRow(tr("law_interval"), self._law_spin)
 
-        support_spin = QSpinBox()
-        support_spin.setRange(1, 72)
-        support_spin.setValue(12)
-        support_spin.setSuffix(tr("hours"))
-        form.addRow(tr("support_interval"), support_spin)
+        self._support_spin = QSpinBox()
+        self._support_spin.setRange(1, 72)
+        self._support_spin.setValue(int(get_setting("support_interval_hr")))
+        self._support_spin.setSuffix(tr("hours"))
+        self._support_spin.valueChanged.connect(
+            lambda v: set_setting("support_interval_hr", str(v))
+        )
+        form.addRow(tr("support_interval"), self._support_spin)
 
         return group
 
+    # ------------------------------------------------------------------
+    # 4. 데이터 관리
+    # ------------------------------------------------------------------
     def _build_data_group(self) -> QGroupBox:
         group = self._make_group(tr("data_management"))
         layout = QVBoxLayout(group)
@@ -207,6 +265,9 @@ class SettingsView(QWidget):
 
         return group
 
+    # ------------------------------------------------------------------
+    # 5. 정보
+    # ------------------------------------------------------------------
     def _build_about_group(self) -> QGroupBox:
         group = self._make_group(tr("about"))
         layout = QVBoxLayout(group)
@@ -224,7 +285,32 @@ class SettingsView(QWidget):
 
         return group
 
-    # -- 버튼 핸들러 --
+    # ------------------------------------------------------------------
+    # 핸들러
+    # ------------------------------------------------------------------
+    def _on_lang_changed(self, index: int) -> None:
+        code = _LANG_CODES[index]
+        set_setting("language", code)
+        self.language_changed.emit(code)
+
+    def _on_theme_changed(self, index: int) -> None:
+        code = _THEME_CODES[index]
+        set_setting("theme", code)
+        self.theme_changed.emit(code)
+
+    def _on_font_changed(self, index: int) -> None:
+        set_setting("font_size", _FONT_SIZES[index])
+
+    def _on_region_changed(self, index: int) -> None:
+        set_setting("default_region", _REGIONS[index])
+
+    def _on_notify_changed(self, key: str, state: int) -> None:
+        set_setting(key, "true" if state else "false")
+
+    def _on_manage_keywords(self) -> None:
+        from app.ui.widgets.keyword_dialog import KeywordDialog
+        dlg = KeywordDialog(parent=self)
+        dlg.exec()
 
     def _on_refresh(self) -> None:
         self._db_info.setText(tr("updating"))

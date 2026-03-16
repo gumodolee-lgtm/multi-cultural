@@ -955,6 +955,38 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
         "vi": "Đã lưu tệp",
         "zh": "文件已保存",
     },
+
+    # -- 키워드 관리 다이얼로그 --
+    "keyword_desc": {
+        "ko": "관심 키워드를 등록하면 새 뉴스/지원사업에 해당 키워드가 포함될 때 알림을 받습니다.",
+        "en": "Register keywords to get notified when new news or programs contain them.",
+        "vi": "Đăng ký từ khóa để nhận thông báo khi có tin tức hoặc chương trình mới chứa từ khóa.",
+        "zh": "注册关键词，当新消息或支援事业包含关键词时将收到通知。",
+    },
+    "keyword_placeholder": {
+        "ko": "키워드 입력...",
+        "en": "Enter keyword...",
+        "vi": "Nhập từ khóa...",
+        "zh": "输入关键词...",
+    },
+    "keyword_add": {
+        "ko": "추가",
+        "en": "Add",
+        "vi": "Thêm",
+        "zh": "添加",
+    },
+    "keyword_delete": {
+        "ko": "삭제",
+        "en": "Delete",
+        "vi": "Xóa",
+        "zh": "删除",
+    },
+    "keyword_exists": {
+        "ko": "이미 등록된 키워드입니다.",
+        "en": "This keyword already exists.",
+        "vi": "Từ khóa này đã tồn tại.",
+        "zh": "该关键词已存在。",
+    },
 }
 
 
