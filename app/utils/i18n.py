@@ -387,6 +387,202 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
         "vi": "Liên hệ",
         "zh": "联系方式",
     },
+
+    # -- 설정 뷰 --
+    "settings_title": {
+        "ko": "⚙️ 설정",
+        "en": "⚙️ Settings",
+        "vi": "⚙️ Cài đặt",
+        "zh": "⚙️ 设置",
+    },
+    "general": {
+        "ko": "🌐 일반",
+        "en": "🌐 General",
+        "vi": "🌐 Chung",
+        "zh": "🌐 一般",
+    },
+    "interface_lang": {
+        "ko": "인터페이스 언어:",
+        "en": "Interface language:",
+        "vi": "Ngôn ngữ giao diện:",
+        "zh": "界面语言：",
+    },
+    "theme": {
+        "ko": "테마:",
+        "en": "Theme:",
+        "vi": "Chủ đề:",
+        "zh": "主题：",
+    },
+    "theme_light": {
+        "ko": "라이트",
+        "en": "Light",
+        "vi": "Sáng",
+        "zh": "浅色",
+    },
+    "theme_dark": {
+        "ko": "다크",
+        "en": "Dark",
+        "vi": "Tối",
+        "zh": "深色",
+    },
+    "theme_system": {
+        "ko": "시스템 설정 따르기",
+        "en": "Follow system",
+        "vi": "Theo hệ thống",
+        "zh": "跟随系统",
+    },
+    "font_size": {
+        "ko": "글자 크기:",
+        "en": "Font size:",
+        "vi": "Cỡ chữ:",
+        "zh": "字体大小：",
+    },
+    "default_region": {
+        "ko": "기본 지역:",
+        "en": "Default region:",
+        "vi": "Khu vực mặc định:",
+        "zh": "默认地区：",
+    },
+    "notifications": {
+        "ko": "🔔 알림",
+        "en": "🔔 Notifications",
+        "vi": "🔔 Thông báo",
+        "zh": "🔔 通知",
+    },
+    "notify_law": {
+        "ko": "법령 개정 알림",
+        "en": "Law amendment notification",
+        "vi": "Thông báo sửa đổi luật",
+        "zh": "法令修订通知",
+    },
+    "notify_news": {
+        "ko": "새 뉴스 알림",
+        "en": "New news notification",
+        "vi": "Thông báo tin mới",
+        "zh": "新闻通知",
+    },
+    "notify_support_deadline": {
+        "ko": "지원사업 마감 임박 알림 (D-7, D-1)",
+        "en": "Support program deadline alert (D-7, D-1)",
+        "vi": "Cảnh báo hạn chót chương trình (D-7, D-1)",
+        "zh": "支援事业截止提醒 (D-7, D-1)",
+    },
+    "notify_keyword": {
+        "ko": "관심 키워드 매칭 알림",
+        "en": "Keyword matching notification",
+        "vi": "Thông báo khớp từ khóa",
+        "zh": "关键词匹配通知",
+    },
+    "manage_keywords": {
+        "ko": "키워드 관리",
+        "en": "Manage Keywords",
+        "vi": "Quản lý từ khóa",
+        "zh": "管理关键词",
+    },
+    "auto_update": {
+        "ko": "🔄 자동 업데이트",
+        "en": "🔄 Auto Update",
+        "vi": "🔄 Cập nhật tự động",
+        "zh": "🔄 自动更新",
+    },
+    "news_interval": {
+        "ko": "뉴스 수집 주기:",
+        "en": "News collection interval:",
+        "vi": "Chu kỳ thu thập tin:",
+        "zh": "新闻收集周期：",
+    },
+    "law_interval": {
+        "ko": "법령 확인 주기:",
+        "en": "Law check interval:",
+        "vi": "Chu kỳ kiểm tra luật:",
+        "zh": "法令检查周期：",
+    },
+    "support_interval": {
+        "ko": "지원사업 확인 주기:",
+        "en": "Program check interval:",
+        "vi": "Chu kỳ kiểm tra chương trình:",
+        "zh": "支援事业检查周期：",
+    },
+    "minutes": {
+        "ko": " 분",
+        "en": " min",
+        "vi": " phút",
+        "zh": " 分钟",
+    },
+    "hours": {
+        "ko": " 시간",
+        "en": " hrs",
+        "vi": " giờ",
+        "zh": " 小时",
+    },
+    "data_management": {
+        "ko": "💾 데이터 관리",
+        "en": "💾 Data Management",
+        "vi": "💾 Quản lý dữ liệu",
+        "zh": "💾 数据管理",
+    },
+    "update_now": {
+        "ko": "🔄 지금 업데이트",
+        "en": "🔄 Update Now",
+        "vi": "🔄 Cập nhật ngay",
+        "zh": "🔄 立即更新",
+    },
+    "export_data": {
+        "ko": "📥 데이터 내보내기",
+        "en": "📥 Export Data",
+        "vi": "📥 Xuất dữ liệu",
+        "zh": "📥 导出数据",
+    },
+    "reset_all": {
+        "ko": "🗑️ 전체 초기화",
+        "en": "🗑️ Reset All",
+        "vi": "🗑️ Đặt lại tất cả",
+        "zh": "🗑️ 全部重置",
+    },
+    "reset_confirm_title": {
+        "ko": "데이터 초기화",
+        "en": "Reset Data",
+        "vi": "Đặt lại dữ liệu",
+        "zh": "重置数据",
+    },
+    "reset_confirm_msg": {
+        "ko": "정말로 모든 수집 데이터를 삭제하시겠습니까?\n(북마크 포함 전체 삭제)",
+        "en": "Delete all collected data?\n(Including bookmarks)",
+        "vi": "Xóa tất cả dữ liệu đã thu thập?\n(Bao gồm đánh dấu)",
+        "zh": "确定删除所有数据吗？\n（包括收藏）",
+    },
+    "data_reset_done": {
+        "ko": "데이터가 초기화되었습니다.",
+        "en": "Data has been reset.",
+        "vi": "Đã đặt lại dữ liệu.",
+        "zh": "数据已重置。",
+    },
+    "about": {
+        "ko": "ℹ️ 정보",
+        "en": "ℹ️ About",
+        "vi": "ℹ️ Thông tin",
+        "zh": "ℹ️ 关于",
+    },
+    "updating": {
+        "ko": "수동 업데이트 요청 중...",
+        "en": "Requesting manual update...",
+        "vi": "Đang yêu cầu cập nhật thủ công...",
+        "zh": "正在请求手动更新...",
+    },
+
+    # -- 통계 --
+    "survey_stats_title": {
+        "ko": "📊 다문화가족 실태조사",
+        "en": "📊 Multicultural Family Survey",
+        "vi": "📊 Khảo sát Gia đình Đa văn hóa",
+        "zh": "📊 多文化家庭实态调查",
+    },
+    "survey_year": {
+        "ko": "조사 연도",
+        "en": "Survey Year",
+        "vi": "Năm khảo sát",
+        "zh": "调查年份",
+    },
 }
 
 

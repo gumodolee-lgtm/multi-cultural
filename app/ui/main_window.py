@@ -582,6 +582,7 @@ class MainWindow(QMainWindow):
         if code and code != get_language():
             set_language(code)
             self._update_ui_language()
+            self._rebuild_content_views()
 
     def _update_ui_language(self) -> None:
         """현재 언어로 사이드바 텍스트를 갱신한다."""
@@ -603,6 +604,60 @@ class MainWindow(QMainWindow):
             if nav_key in _key_to_i18n:
                 icon, i18n_key = _key_to_i18n[nav_key]
                 btn.setText(f"  {icon}  {tr(i18n_key)}")
+
+        # 상태바
+        self._status_bar.showMessage(tr("ready"))
+
+    def _rebuild_content_views(self) -> None:
+        """언어 전환 시 모든 콘텐츠 뷰를 재생성한다."""
+        saved_key = self._current_key or "dashboard"
+
+        # 뷰 매핑 (원본과 동일)
+        _view_map = {
+            "dashboard": DashboardView,
+            "visa": VisaAreaView,
+            "health": HealthAreaView,
+            "family": FamilyAreaView,
+            "education": EducationAreaView,
+            "job": JobAreaView,
+            "news": NewsView,
+            "law": LawView,
+            "support": SupportView,
+            "search": SearchView,
+            "bookmark": BookmarkView,
+            "settings": SettingsView,
+            "help": HelpView,
+        }
+
+        # 기존 뷰 모두 제거
+        while self._stack.count():
+            widget = self._stack.widget(0)
+            self._stack.removeWidget(widget)
+            widget.deleteLater()
+
+        # 새 뷰 생성
+        for key in _ALL_KEYS:
+            view_cls = _view_map.get(key)
+            if view_cls:
+                view = view_cls()
+            else:
+                label_text = next(
+                    (item[1] for g in _MENU_GROUPS for item in g["items"] if item[2] == key),
+                    next((item[1] for item in _BOTTOM_ITEMS if item[2] == key), key),
+                )
+                view = QLabel(f"{label_text} (준비 중)")
+                view.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                view.setStyleSheet("color: #BDBDBD; font-size: 18px;")
+            view.setObjectName(f"view_{key}")
+            self._stack.addWidget(view)
+
+            # 설정 뷰 시그널 재연결
+            if key == "settings" and hasattr(view, "refresh_requested"):
+                view.refresh_requested.connect(self._manual_refresh)
+                view.export_requested.connect(self._export_data)
+
+        # 이전 탭 복원
+        self._navigate_to(saved_key)
 
     def update_status(self, message: str) -> None:
         self._status_bar.showMessage(message)

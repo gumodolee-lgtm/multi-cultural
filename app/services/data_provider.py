@@ -14,6 +14,7 @@ from app.models.database import get_session, _SessionLocal
 from app.models.news import News
 from app.models.law import Law
 from app.models.support import SupportProgram
+from app.models.survey import SurveyStats
 
 logger = logging.getLogger(__name__)
 
@@ -283,6 +284,33 @@ class DataProvider:
         except Exception:
             session.rollback()
             return False
+        finally:
+            session.close()
+
+    # ------------------------------------------------------------------
+    # 다문화가족실태조사 통계
+    # ------------------------------------------------------------------
+    @staticmethod
+    def get_survey_stats() -> list[dict]:
+        """다문화가족실태조사 통계 데이터를 반환한다."""
+        session = _get_session()
+        if session is None:
+            return []
+        try:
+            rows = session.execute(
+                select(SurveyStats).order_by(SurveyStats.survey_year.desc())
+            ).scalars().all()
+            return [
+                {
+                    "id": r.id,
+                    "approval_no": r.approval_no,
+                    "survey_name": r.survey_name,
+                    "cycle": r.cycle or "",
+                    "survey_year": r.survey_year,
+                    "data_created": r.data_created or "",
+                }
+                for r in rows
+            ]
         finally:
             session.close()
 

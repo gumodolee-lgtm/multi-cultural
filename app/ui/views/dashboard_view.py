@@ -72,6 +72,12 @@ class DashboardView(QWidget):
         for sp in closing[:3]:
             layout.addWidget(self._support_item(sp))
 
+        # 다문화가족실태조사 통계
+        survey_data = DataProvider.get_survey_stats()
+        if survey_data:
+            layout.addWidget(self._section_title(tr("survey_stats_title")))
+            layout.addWidget(self._survey_section(survey_data))
+
         layout.addStretch()
         self._scroll.setWidget(container)
 
@@ -197,6 +203,44 @@ class DashboardView(QWidget):
         layout.addWidget(deadline)
 
         frame.mousePressEvent = lambda e, d=data: self._open_support_detail(d)
+        return frame
+
+    def _survey_section(self, data: list[dict]) -> QFrame:
+        """다문화가족실태조사 통계 표시 카드"""
+        frame = QFrame()
+        frame.setStyleSheet(
+            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
+        )
+        layout = QVBoxLayout(frame)
+        layout.setContentsMargins(16, 12, 16, 12)
+        layout.setSpacing(8)
+
+        # 조사 연도 목록을 가로 카드로 표시
+        row = QHBoxLayout()
+        row.setSpacing(12)
+        for item in data:
+            year_card = QFrame()
+            year_card.setStyleSheet(
+                "QFrame { background: #E8EAF6; border: 1px solid #C5CAE9;"
+                " border-radius: 8px; }"
+            )
+            year_layout = QVBoxLayout(year_card)
+            year_layout.setContentsMargins(16, 10, 16, 10)
+
+            year_label = QLabel(item["survey_year"])
+            year_label.setStyleSheet("font-size: 22px; font-weight: bold; color: #283593;")
+            year_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            year_layout.addWidget(year_label)
+
+            name_label = QLabel(tr("survey_year"))
+            name_label.setStyleSheet("font-size: 11px; color: #5C6BC0;")
+            name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            year_layout.addWidget(name_label)
+
+            row.addWidget(year_card)
+        row.addStretch()
+        layout.addLayout(row)
+
         return frame
 
     def _open_support_detail(self, data: dict) -> None:

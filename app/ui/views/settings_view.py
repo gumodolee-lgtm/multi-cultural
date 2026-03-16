@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 
 from app.ui.styles import COLORS
+from app.utils.i18n import tr
 
 
 class SettingsView(QWidget):
@@ -31,7 +32,7 @@ class SettingsView(QWidget):
         layout.setSpacing(20)
 
         # 헤더
-        header = QLabel("⚙️ 설정")
+        header = QLabel(tr("settings_title"))
         header.setStyleSheet("font-size: 22px; font-weight: bold; color: #212121;")
         layout.addWidget(header)
 
@@ -79,7 +80,7 @@ class SettingsView(QWidget):
         return group
 
     def _build_general_group(self) -> QGroupBox:
-        group = self._make_group("🌐 일반")
+        group = self._make_group(tr("general"))
         form = QFormLayout(group)
         form.setSpacing(12)
 
@@ -87,99 +88,94 @@ class SettingsView(QWidget):
         lang = QComboBox()
         lang.addItems(["한국어", "English", "Tiếng Việt", "中文"])
         lang.setMinimumWidth(200)
-        form.addRow("인터페이스 언어:", lang)
+        form.addRow(tr("interface_lang"), lang)
 
         # 테마
         theme = QComboBox()
-        theme.addItems(["라이트", "다크", "시스템 설정 따르기"])
+        theme.addItems([tr("theme_light"), tr("theme_dark"), tr("theme_system")])
         theme.setMinimumWidth(200)
-        form.addRow("테마:", theme)
+        form.addRow(tr("theme"), theme)
 
         # 글자 크기
         font_size = QComboBox()
-        font_size.addItems(["작게 (11pt)", "보통 (13pt)", "크게 (16pt)"])
+        font_size.addItems(["11pt", "13pt", "16pt"])
         font_size.setCurrentIndex(1)
         font_size.setMinimumWidth(200)
-        form.addRow("글자 크기:", font_size)
+        form.addRow(tr("font_size"), font_size)
 
         # 기본 지역
         region = QComboBox()
         region.addItems(["전국", "서울", "경기", "인천", "부산", "대구", "광주", "대전", "울산", "세종",
                         "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"])
         region.setMinimumWidth(200)
-        form.addRow("기본 지역:", region)
+        form.addRow(tr("default_region"), region)
 
         return group
 
     def _build_notification_group(self) -> QGroupBox:
-        group = self._make_group("🔔 알림")
+        group = self._make_group(tr("notifications"))
         layout = QVBoxLayout(group)
         layout.setSpacing(8)
 
         checks = [
-            ("법령 개정 알림", True),
-            ("새 뉴스 알림", True),
-            ("지원사업 마감 임박 알림 (D-7, D-1)", True),
-            ("관심 키워드 매칭 알림", False),
+            (tr("notify_law"), True),
+            (tr("notify_news"), True),
+            (tr("notify_support_deadline"), True),
+            (tr("notify_keyword"), False),
         ]
         for text, checked in checks:
             cb = QCheckBox(text)
             cb.setChecked(checked)
             layout.addWidget(cb)
 
-        # 알림 키워드 관리
-        kw_label = QLabel("📝 관심 키워드: 다문화, 결혼이민, 귀화, 외국인 주민")
-        kw_label.setStyleSheet("color: #757575; font-size: 12px; padding-top: 8px;")
-        layout.addWidget(kw_label)
-
-        edit_btn = QPushButton("키워드 관리")
+        edit_btn = QPushButton(tr("manage_keywords"))
         edit_btn.setStyleSheet(
             "QPushButton { background: transparent; color: #1565C0; border: 1px solid #1565C0;"
             " border-radius: 4px; padding: 4px 12px; }"
             "QPushButton:hover { background: #E3F2FD; }"
         )
-        edit_btn.setFixedWidth(120)
+        edit_btn.setFixedWidth(140)
         layout.addWidget(edit_btn)
 
         return group
 
     def _build_scheduler_group(self) -> QGroupBox:
-        group = self._make_group("🔄 자동 업데이트")
+        group = self._make_group(tr("auto_update"))
         form = QFormLayout(group)
         form.setSpacing(12)
 
         news_spin = QSpinBox()
         news_spin.setRange(15, 360)
         news_spin.setValue(60)
-        news_spin.setSuffix(" 분")
-        form.addRow("뉴스 수집 주기:", news_spin)
+        news_spin.setSuffix(tr("minutes"))
+        form.addRow(tr("news_interval"), news_spin)
 
         law_spin = QSpinBox()
         law_spin.setRange(1, 72)
         law_spin.setValue(24)
-        law_spin.setSuffix(" 시간")
-        form.addRow("법령 확인 주기:", law_spin)
+        law_spin.setSuffix(tr("hours"))
+        form.addRow(tr("law_interval"), law_spin)
 
         support_spin = QSpinBox()
         support_spin.setRange(1, 72)
         support_spin.setValue(12)
-        support_spin.setSuffix(" 시간")
-        form.addRow("지원사업 확인 주기:", support_spin)
+        support_spin.setSuffix(tr("hours"))
+        form.addRow(tr("support_interval"), support_spin)
 
         return group
 
     def _build_data_group(self) -> QGroupBox:
-        group = self._make_group("💾 데이터 관리")
+        group = self._make_group(tr("data_management"))
         layout = QVBoxLayout(group)
         layout.setSpacing(8)
 
-        self._db_info = QLabel("데이터베이스: data/michub.db")
+        self._db_info = QLabel("DB: data/michub.db")
         self._db_info.setStyleSheet("color: #757575; font-size: 12px;")
         layout.addWidget(self._db_info)
 
         row = QHBoxLayout()
 
-        refresh_btn = QPushButton("🔄 지금 업데이트")
+        refresh_btn = QPushButton(tr("update_now"))
         refresh_btn.setStyleSheet(
             "QPushButton { background: #1565C0; color: white; border: none;"
             " border-radius: 6px; padding: 8px 16px; }"
@@ -188,7 +184,7 @@ class SettingsView(QWidget):
         refresh_btn.clicked.connect(self._on_refresh)
         row.addWidget(refresh_btn)
 
-        export_btn = QPushButton("📥 데이터 내보내기")
+        export_btn = QPushButton(tr("export_data"))
         export_btn.setStyleSheet(
             "QPushButton { background: transparent; color: #1565C0; border: 1px solid #1565C0;"
             " border-radius: 6px; padding: 8px 16px; }"
@@ -197,7 +193,7 @@ class SettingsView(QWidget):
         export_btn.clicked.connect(self._on_export)
         row.addWidget(export_btn)
 
-        clear_btn = QPushButton("🗑️ 전체 초기화")
+        clear_btn = QPushButton(tr("reset_all"))
         clear_btn.setStyleSheet(
             "QPushButton { background: transparent; color: #D32F2F; border: 1px solid #D32F2F;"
             " border-radius: 6px; padding: 8px 16px; }"
@@ -212,15 +208,14 @@ class SettingsView(QWidget):
         return group
 
     def _build_about_group(self) -> QGroupBox:
-        group = self._make_group("ℹ️ 정보")
+        group = self._make_group(tr("about"))
         layout = QVBoxLayout(group)
 
         about_text = (
-            "다문화 정보 허브 v0.1.0\n"
-            "다문화 관련 뉴스·법령·지원사업을 한 곳에서 확인하세요.\n\n"
-            "기술 스택: Python 3.12 + PyQt6\n"
-            "데이터베이스: SQLite + SQLAlchemy\n"
-            "라이선스: MIT"
+            f"{tr('app_name')} v0.1.0\n\n"
+            "Python 3.12 + PyQt6\n"
+            "SQLite + SQLAlchemy\n"
+            "MIT License"
         )
         about = QLabel(about_text)
         about.setStyleSheet("color: #616161; font-size: 12px;")
@@ -232,7 +227,7 @@ class SettingsView(QWidget):
     # -- 버튼 핸들러 --
 
     def _on_refresh(self) -> None:
-        self._db_info.setText("수동 업데이트 요청 중...")
+        self._db_info.setText(tr("updating"))
         self.refresh_requested.emit()
 
     def _on_export(self) -> None:
@@ -240,8 +235,8 @@ class SettingsView(QWidget):
 
     def _on_clear(self) -> None:
         reply = QMessageBox.question(
-            self, "데이터 초기화",
-            "정말로 모든 수집 데이터를 삭제하시겠습니까?\n(북마크 포함 전체 삭제)",
+            self, tr("reset_confirm_title"),
+            tr("reset_confirm_msg"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,
         )
@@ -262,10 +257,10 @@ class SettingsView(QWidget):
             session.query(Law).delete()
             session.query(SupportProgram).delete()
             session.commit()
-            self._db_info.setText("데이터가 초기화되었습니다.")
+            self._db_info.setText(tr("data_reset_done"))
         except Exception as e:
             session.rollback()
-            self._db_info.setText(f"초기화 실패: {e}")
+            self._db_info.setText(f"Error: {e}")
         finally:
             try:
                 next(session_gen)
