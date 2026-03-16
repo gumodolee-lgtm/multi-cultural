@@ -198,7 +198,7 @@ class MainWindow(QMainWindow):
             f"QStatusBar {{ background: {C_HEADER_BG}; color: #888; font-size: 11px; "
             f"border-top: 1px solid {C_HEADER_BOR}; }}"
         )
-        self._status_bar.showMessage("준비")
+        self._status_bar.showMessage(tr("ready"))
         self.setStatusBar(self._status_bar)
 
     # ------------------------------------------------------------------
@@ -214,37 +214,50 @@ class MainWindow(QMainWindow):
         sig.error_occurred.connect(self._on_error)
 
     def _on_news_collected(self, count: int) -> None:
-        self.update_status(f"뉴스 {count}건 수집 완료")
+        self.update_status(tr("news_collected_status").format(count=count))
         self._refresh_all_views()
         if count > 0:
-            self._tray_notify("새 뉴스", f"뉴스 {count}건이 수집되었습니다.")
+            self._tray_notify(
+                tr("notify_news_title"),
+                tr("notify_news_msg").format(count=count),
+            )
 
     def _on_laws_collected(self, count: int) -> None:
-        self.update_status(f"법령 {count}건 수집 완료")
+        self.update_status(tr("laws_collected_status").format(count=count))
         self._refresh_all_views()
         if count > 0:
-            self._tray_notify("법령 업데이트", f"법령 {count}건이 수집되었습니다.")
+            self._tray_notify(
+                tr("notify_law_title"),
+                tr("notify_law_msg").format(count=count),
+            )
 
     def _on_support_collected(self, count: int) -> None:
-        self.update_status(f"지원사업 {count}건 수집 완료")
+        self.update_status(tr("support_collected_status").format(count=count))
         self._refresh_all_views()
         if count > 0:
-            self._tray_notify("지원사업 업데이트", f"지원사업 {count}건이 수집되었습니다.")
+            self._tray_notify(
+                tr("notify_support_title"),
+                tr("notify_support_msg").format(count=count),
+            )
 
     def _on_all_collected(self, news: int, laws: int, support: int) -> None:
         total = news + laws + support
         self.update_status(
-            f"수집 완료 — 뉴스 {news}, 법령 {laws}, 지원사업 {support} (총 {total}건)"
+            tr("collection_status").format(
+                news=news, laws=laws, support=support, total=total,
+            )
         )
         self._refresh_all_views()
         if total > 0:
             self._tray_notify(
-                "데이터 수집 완료",
-                f"뉴스 {news}건, 법령 {laws}건, 지원사업 {support}건",
+                tr("notify_all_title"),
+                tr("collection_status").format(
+                    news=news, laws=laws, support=support, total=total,
+                ),
             )
 
     def _on_error(self, message: str) -> None:
-        self.update_status(f"오류: {message}")
+        self.update_status(f"{tr('error_prefix')}: {message}")
         logger.warning("수집 오류 시그널: %s", message)
 
     def _refresh_all_views(self) -> None:
@@ -268,14 +281,14 @@ class MainWindow(QMainWindow):
 
         # 트레이 메뉴
         tray_menu = QMenu()
-        show_action = tray_menu.addAction("열기")
+        show_action = tray_menu.addAction(tr("tray_open"))
         show_action.triggered.connect(self._show_from_tray)
 
-        refresh_action = tray_menu.addAction("지금 업데이트")
+        refresh_action = tray_menu.addAction(tr("tray_update"))
         refresh_action.triggered.connect(self._manual_refresh)
 
         tray_menu.addSeparator()
-        quit_action = tray_menu.addAction("종료")
+        quit_action = tray_menu.addAction(tr("tray_quit"))
         quit_action.triggered.connect(self.close)
 
         self._tray_icon.setContextMenu(tray_menu)
@@ -333,23 +346,23 @@ class MainWindow(QMainWindow):
 
     def _manual_refresh(self) -> None:
         """사용자가 수동으로 데이터를 새로고침한다."""
-        self.update_status("수동 수집 시작...")
+        self.update_status(tr("manual_collection_start"))
         if self._scheduler:
             t = threading.Thread(target=self._scheduler.run_once, daemon=True)
             t.start()
         else:
             self._refresh_all_views()
-            self.update_status("뷰 갱신 완료")
+            self.update_status(tr("view_refreshed"))
 
     def _export_data(self) -> None:
         """데이터를 Excel 파일로 내보낸다."""
         from app.services.export_service import ExportService
         try:
             path = ExportService.export_all()
-            self.update_status(f"내보내기 완료: {path}")
-            self._tray_notify("내보내기 완료", f"파일 저장: {path}")
+            self.update_status(f"{tr('export_done')}: {path}")
+            self._tray_notify(tr("export_done"), f"{tr('file_saved')}: {path}")
         except Exception as e:
-            self.update_status(f"내보내기 실패: {e}")
+            self.update_status(f"{tr('export_failed')}: {e}")
             logger.exception("내보내기 실패")
 
     # ------------------------------------------------------------------
@@ -388,7 +401,7 @@ class MainWindow(QMainWindow):
         refresh_btn = QPushButton("🔄")
         refresh_btn.setFixedSize(28, 28)
         refresh_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        refresh_btn.setToolTip("데이터 새로고침")
+        refresh_btn.setToolTip(tr("data_refresh_tooltip"))
         refresh_btn.setStyleSheet(f"""
             QPushButton {{
                 background: transparent;

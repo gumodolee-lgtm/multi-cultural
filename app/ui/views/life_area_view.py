@@ -227,7 +227,7 @@ class LifeAreaView(QWidget):
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
         layout.addWidget(title)
 
-        meta = QLabel(f"개정 {data.get('amended_date', '')}  ·  시행 {data.get('effective_date', '')}")
+        meta = QLabel(f"{tr('amended')} {data.get('amended_date', '')}  ·  {tr('effective')} {data.get('effective_date', '')}")
         meta.setTextFormat(Qt.TextFormat.PlainText)
         meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
         layout.addWidget(meta)
@@ -273,7 +273,7 @@ class LifeAreaView(QWidget):
 
         meta_parts = [data.get("organizer", ""), data.get("region", "")]
         if data.get("apply_end"):
-            meta_parts.append(f"마감: {data['apply_end']}")
+            meta_parts.append(f"{tr('deadline_label')}: {data['apply_end']}")
         meta = QLabel("  ·  ".join(p for p in meta_parts if p))
         meta.setTextFormat(Qt.TextFormat.PlainText)
         meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
@@ -314,8 +314,8 @@ class VisaAreaView(LifeAreaView):
         super().__init__(AreaConfig(
             key="visa",
             icon="🛂",
-            title="비자·체류",
-            description="출입국 정책, 비자 제도, 체류 자격 변경, 귀화·국적 관련 정보를 모아봅니다.",
+            title=tr("visa_title"),
+            description=tr("visa_desc"),
             color="#1565C0",
             news_keywords=["출입국", "비자", "체류", "국적", "귀화", "사회통합"],
             law_keywords=["출입국", "국적", "체류", "비자"],
@@ -329,8 +329,8 @@ class HealthAreaView(LifeAreaView):
         super().__init__(AreaConfig(
             key="health",
             icon="⚕️",
-            title="의료·복지",
-            description="의료비 지원, 건강검진, 의료 통역, 복지 서비스 관련 정보를 모아봅니다.",
+            title=tr("health_title"),
+            description=tr("health_desc"),
             color="#2E7D32",
             news_keywords=["의료", "복지", "건강", "검진", "통역"],
             law_keywords=["의료", "복지", "건강"],
@@ -344,8 +344,8 @@ class FamilyAreaView(LifeAreaView):
         super().__init__(AreaConfig(
             key="family",
             icon="👶",
-            title="가족·육아",
-            description="다문화가족 방문교육, 이중언어 환경, 자녀 교육 관련 정보를 모아봅니다.",
+            title=tr("family_title"),
+            description=tr("family_desc"),
             color="#7B1FA2",
             news_keywords=["가족", "육아", "자녀", "방문교육", "이중언어", "다문화가정"],
             law_keywords=["가족", "다문화가족"],
@@ -359,8 +359,8 @@ class EducationAreaView(LifeAreaView):
         super().__init__(AreaConfig(
             key="education",
             icon="🎓",
-            title="교육·문화",
-            description="한국어 교육, 문화 프로그램, 사회통합프로그램(KIIP) 관련 정보를 모아봅니다.",
+            title=tr("education_title"),
+            description=tr("education_desc"),
             color="#E65100",
             news_keywords=["교육", "문화", "한국어", "프로그램", "사회통합"],
             law_keywords=["교육", "사회통합", "재한외국인"],
@@ -374,8 +374,8 @@ class JobAreaView(LifeAreaView):
         super().__init__(AreaConfig(
             key="job",
             icon="💼",
-            title="일자리",
-            description="취업 연계, 직업 교육, 자격증 지원, 외국인 고용 관련 정보를 모아봅니다.",
+            title=tr("job_title"),
+            description=tr("job_desc"),
             color="#FF8F00",
             news_keywords=["일자리", "취업", "고용", "근로", "직업", "창업"],
             law_keywords=["근로자", "고용", "노동"],
