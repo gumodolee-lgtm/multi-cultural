@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from app.services.data_provider import DataProvider
+from app.ui.widgets.detail_dialog import DetailDialog
 
 
 class BookmarkView(QWidget):
@@ -107,6 +108,7 @@ class BookmarkView(QWidget):
 
     def _make_card(self, item: dict, kind: str) -> QFrame:
         card = QFrame()
+        card.setCursor(Qt.CursorShape.PointingHandCursor)
         card.setStyleSheet(
             "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
             "QFrame:hover { border-color: #FFB300; }"
@@ -140,4 +142,35 @@ class BookmarkView(QWidget):
         info.addWidget(meta)
         layout.addLayout(info, 1)
 
+        card.mousePressEvent = lambda e, i=item, k=kind: self._open_detail(i, k)
         return card
+
+    def _open_detail(self, item: dict, kind: str) -> None:
+        if kind == "news":
+            title = item["title"]
+            meta = [
+                f"📰 {item.get('source', '')}  ·  {item.get('category', '')}",
+                f"📅 {item.get('published', '')}",
+            ]
+            body = item.get("content", item.get("summary", ""))
+            url = item.get("url", "")
+        elif kind == "law":
+            title = item["name"]
+            meta = [
+                f"⚖️ {item.get('category', '')}",
+                f"📅 개정 {item.get('amended_date', '')}  ·  시행 {item.get('effective_date', '')}",
+            ]
+            body = item.get("summary", item.get("content", ""))
+            url = item.get("url", "")
+        else:
+            title = item["name"]
+            meta = [
+                f"🏛️ {item.get('organizer', '')}  ·  {item.get('region', '')}",
+                f"📅 {item.get('apply_start', '')} ~ {item.get('apply_end', '')}",
+                f"👥 대상: {item.get('target_group', '')}",
+            ]
+            body = f"💰 지원내용: {item.get('benefit', '')}\n\n📞 연락처: {item.get('contact', '')}"
+            url = item.get("url", "")
+
+        dlg = DetailDialog(title=title, meta_lines=meta, body=body, url=url, parent=self)
+        dlg.exec()

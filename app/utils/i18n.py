@@ -215,6 +215,178 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
         "vi": "Công cụ",
         "zh": "工具",
     },
+
+    # -- 대시보드 --
+    "dashboard_title": {
+        "ko": "📋 대시보드",
+        "en": "📋 Dashboard",
+        "vi": "📋 Bảng điều khiển",
+        "zh": "📋 仪表盘",
+    },
+    "recent_news": {
+        "ko": "📰 최근 뉴스",
+        "en": "📰 Recent News",
+        "vi": "📰 Tin mới nhất",
+        "zh": "📰 最新新闻",
+    },
+    "closing_support": {
+        "ko": "⏰ 마감 임박 지원사업",
+        "en": "⏰ Closing Soon Programs",
+        "vi": "⏰ Chương trình sắp hết hạn",
+        "zh": "⏰ 即将截止的支援事业",
+    },
+
+    # -- 검색 --
+    "search_title": {
+        "ko": "🔍 통합 검색",
+        "en": "🔍 Unified Search",
+        "vi": "🔍 Tìm kiếm tổng hợp",
+        "zh": "🔍 综合搜索",
+    },
+    "search_desc": {
+        "ko": "뉴스, 법령, 지원사업을 한 번에 검색합니다",
+        "en": "Search news, laws, and support programs at once",
+        "vi": "Tìm kiếm tin tức, pháp luật và chương trình hỗ trợ cùng lúc",
+        "zh": "一次搜索新闻、法令和支援事业",
+    },
+    "popular_keywords": {
+        "ko": "💡 인기 검색어",
+        "en": "💡 Popular Keywords",
+        "vi": "💡 Từ khóa phổ biến",
+        "zh": "💡 热门搜索词",
+    },
+    "search_result": {
+        "ko": "검색 결과",
+        "en": "Search Results",
+        "vi": "Kết quả tìm kiếm",
+        "zh": "搜索结果",
+    },
+
+    # -- 북마크 --
+    "bookmark_title": {
+        "ko": "⭐ 북마크",
+        "en": "⭐ Bookmarks",
+        "vi": "⭐ Đánh dấu",
+        "zh": "⭐ 收藏",
+    },
+    "saved_items_count": {
+        "ko": "총 {count}개 항목이 저장되어 있습니다",
+        "en": "{count} items saved",
+        "vi": "Đã lưu {count} mục",
+        "zh": "共保存{count}个项目",
+    },
+    "no_saved_items": {
+        "ko": "저장된 항목이 없습니다.",
+        "en": "No saved items.",
+        "vi": "Không có mục đã lưu.",
+        "zh": "没有保存的项目。",
+    },
+
+    # -- 상세 --
+    "view_source": {
+        "ko": "🔗 원문 보기",
+        "en": "🔗 View Source",
+        "vi": "🔗 Xem nguồn",
+        "zh": "🔗 查看原文",
+    },
+    "close": {
+        "ko": "닫기",
+        "en": "Close",
+        "vi": "Đóng",
+        "zh": "关闭",
+    },
+    "select_item": {
+        "ko": "← 항목을 선택하세요",
+        "en": "← Select an item",
+        "vi": "← Chọn một mục",
+        "zh": "← 请选择一个项目",
+    },
+    "no_content": {
+        "ko": "(내용 없음)",
+        "en": "(No content)",
+        "vi": "(Không có nội dung)",
+        "zh": "(无内容)",
+    },
+
+    # -- 필터/카테고리 --
+    "all": {
+        "ko": "전체",
+        "en": "All",
+        "vi": "Tất cả",
+        "zh": "全部",
+    },
+    "news_search": {
+        "ko": "뉴스 검색...",
+        "en": "Search news...",
+        "vi": "Tìm kiếm tin tức...",
+        "zh": "搜索新闻...",
+    },
+
+    # -- 생활영역 --
+    "related_news": {
+        "ko": "📰 관련 뉴스",
+        "en": "📰 Related News",
+        "vi": "📰 Tin liên quan",
+        "zh": "📰 相关新闻",
+    },
+    "related_laws": {
+        "ko": "⚖️ 관련 법령",
+        "en": "⚖️ Related Laws",
+        "vi": "⚖️ Luật liên quan",
+        "zh": "⚖️ 相关法令",
+    },
+    "related_support": {
+        "ko": "🏛️ 관련 지원사업",
+        "en": "🏛️ Related Programs",
+        "vi": "🏛️ Chương trình liên quan",
+        "zh": "🏛️ 相关支援事业",
+    },
+    "no_data_yet": {
+        "ko": "아직 수집된 데이터가 없습니다.\n자동 수집이 시작되면 관련 정보가 여기에 표시됩니다.",
+        "en": "No data collected yet.\nRelated information will appear here once auto-collection starts.",
+        "vi": "Chưa có dữ liệu.\nThông tin liên quan sẽ hiển thị khi bắt đầu thu thập tự động.",
+        "zh": "暂无数据。\n自动采集开始后，相关信息将显示在此处。",
+    },
+
+    # -- 설정 --
+    "auto_collection": {
+        "ko": "자동 수집",
+        "en": "Auto Collection",
+        "vi": "Thu thập tự động",
+        "zh": "自动采集",
+    },
+    "manual_refresh": {
+        "ko": "수동 새로고침",
+        "en": "Manual Refresh",
+        "vi": "Làm mới thủ công",
+        "zh": "手动刷新",
+    },
+
+    # -- 법령 AI 요약 --
+    "ai_summary": {
+        "ko": "💡 AI 요약",
+        "en": "💡 AI Summary",
+        "vi": "💡 Tóm tắt AI",
+        "zh": "💡 AI摘要",
+    },
+    "target": {
+        "ko": "대상",
+        "en": "Target Group",
+        "vi": "Đối tượng",
+        "zh": "对象",
+    },
+    "benefit": {
+        "ko": "지원내용",
+        "en": "Benefits",
+        "vi": "Hỗ trợ",
+        "zh": "支援内容",
+    },
+    "contact": {
+        "ko": "연락처",
+        "en": "Contact",
+        "vi": "Liên hệ",
+        "zh": "联系方式",
+    },
 }
 
 

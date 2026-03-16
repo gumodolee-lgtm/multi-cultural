@@ -10,6 +10,7 @@ from PyQt6.QtCore import Qt
 
 from app.services.data_provider import DataProvider
 from app.ui.styles import COLORS
+from app.ui.widgets.detail_dialog import DetailDialog
 
 
 class DashboardView(QWidget):
@@ -119,6 +120,7 @@ class DashboardView(QWidget):
 
     def _news_item(self, data: dict) -> QFrame:
         frame = QFrame()
+        frame.setCursor(Qt.CursorShape.PointingHandCursor)
         frame.setStyleSheet(
             "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
             "QFrame:hover { border-color: #1565C0; }"
@@ -139,10 +141,25 @@ class DashboardView(QWidget):
         left.addWidget(meta)
         layout.addLayout(left, 1)
 
+        frame.mousePressEvent = lambda e, d=data: self._open_news_detail(d)
         return frame
+
+    def _open_news_detail(self, data: dict) -> None:
+        dlg = DetailDialog(
+            title=data["title"],
+            meta_lines=[
+                f"📰 {data.get('source', '')}  ·  {data.get('category', '')}",
+                f"📅 {data.get('published', '')}",
+            ],
+            body=data.get("content", data.get("summary", "")),
+            url=data.get("url", ""),
+            parent=self,
+        )
+        dlg.exec()
 
     def _support_item(self, data: dict) -> QFrame:
         frame = QFrame()
+        frame.setCursor(Qt.CursorShape.PointingHandCursor)
         frame.setStyleSheet(
             "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
             "QFrame:hover { border-color: #FF8F00; }"
@@ -178,4 +195,19 @@ class DashboardView(QWidget):
         )
         layout.addWidget(deadline)
 
+        frame.mousePressEvent = lambda e, d=data: self._open_support_detail(d)
         return frame
+
+    def _open_support_detail(self, data: dict) -> None:
+        dlg = DetailDialog(
+            title=data.get("name", ""),
+            meta_lines=[
+                f"🏛️ {data.get('organizer', '')}  ·  {data.get('region', '')}",
+                f"📅 {data.get('apply_start', '')} ~ {data.get('apply_end', '')}",
+                f"👥 대상: {data.get('target_group', '')}",
+            ],
+            body=f"💰 지원내용: {data.get('benefit', '')}\n\n📞 연락처: {data.get('contact', '')}",
+            url=data.get("url", ""),
+            parent=self,
+        )
+        dlg.exec()

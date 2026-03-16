@@ -16,6 +16,7 @@ from PyQt6.QtCore import Qt
 
 from app.services.data_provider import DataProvider
 from app.ui.styles import COLORS
+from app.ui.widgets.detail_dialog import DetailDialog
 
 
 @dataclass
@@ -194,11 +195,21 @@ class LifeAreaView(QWidget):
         summary.setWordWrap(True)
         layout.addWidget(summary)
 
-        url = data.get("url", "")
-        if url:
-            frame.mousePressEvent = lambda e, u=url: webbrowser.open(u)
-
+        frame.mousePressEvent = lambda e, d=data: self._open_news_detail(d)
         return frame
+
+    def _open_news_detail(self, data: dict) -> None:
+        dlg = DetailDialog(
+            title=data["title"],
+            meta_lines=[
+                f"📰 {data.get('source', '')}  ·  {data.get('category', '')}",
+                f"📅 {data.get('published', '')}",
+            ],
+            body=data.get("content", data.get("summary", "")),
+            url=data.get("url", ""),
+            parent=self,
+        )
+        dlg.exec()
 
     def _law_card(self, data: dict) -> QFrame:
         frame = QFrame()
@@ -226,7 +237,22 @@ class LifeAreaView(QWidget):
         summary.setWordWrap(True)
         layout.addWidget(summary)
 
+        frame.setCursor(Qt.CursorShape.PointingHandCursor)
+        frame.mousePressEvent = lambda e, d=data: self._open_law_detail(d)
         return frame
+
+    def _open_law_detail(self, data: dict) -> None:
+        dlg = DetailDialog(
+            title=data["name"],
+            meta_lines=[
+                f"⚖️ {data.get('category', '')}",
+                f"📅 개정 {data.get('amended_date', '')}  ·  시행 {data.get('effective_date', '')}",
+            ],
+            body=data.get("summary", data.get("content", "")),
+            url=data.get("url", ""),
+            parent=self,
+        )
+        dlg.exec()
 
     def _support_card(self, data: dict) -> QFrame:
         frame = QFrame()
@@ -258,7 +284,23 @@ class LifeAreaView(QWidget):
         benefit.setWordWrap(True)
         layout.addWidget(benefit)
 
+        frame.setCursor(Qt.CursorShape.PointingHandCursor)
+        frame.mousePressEvent = lambda e, d=data: self._open_support_detail(d)
         return frame
+
+    def _open_support_detail(self, data: dict) -> None:
+        dlg = DetailDialog(
+            title=data.get("name", ""),
+            meta_lines=[
+                f"🏛️ {data.get('organizer', '')}  ·  {data.get('region', '')}",
+                f"📅 {data.get('apply_start', '')} ~ {data.get('apply_end', '')}",
+                f"👥 대상: {data.get('target_group', '')}",
+            ],
+            body=f"💰 지원내용: {data.get('benefit', '')}\n\n📞 연락처: {data.get('contact', '')}",
+            url=data.get("url", ""),
+            parent=self,
+        )
+        dlg.exec()
 
 
 # ------------------------------------------------------------------
