@@ -33,7 +33,7 @@ def init_db(db_path: str | None = None) -> None:
     _SessionLocal = sessionmaker(bind=_engine, autocommit=False, autoflush=False)
 
     # 모든 테이블 생성 (이미 존재하면 무시)
-    from app.models import news, law, support, settings  # noqa: F401
+    from app.models import news, law, support, settings, survey  # noqa: F401
     Base.metadata.create_all(_engine)
 
 

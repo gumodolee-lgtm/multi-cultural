@@ -48,3 +48,12 @@ def collect_support(config: AppConfig) -> int:
 
     logger.info("지원사업 수집 완료: %d건", count)
     return count
+
+
+def collect_survey(config: AppConfig) -> int:
+    """다문화가족실태조사 통계 수집 작업"""
+    from app.services.survey_service import SurveyService
+    service = SurveyService(config)
+    count = service.fetch_all()
+    logger.info("다문화가족실태조사 수집 완료: %d건", count)
+    return count

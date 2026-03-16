@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from app.scheduler.tasks import collect_news, collect_laws, collect_support
+from app.scheduler.tasks import collect_news, collect_laws, collect_support, collect_survey
 
 if TYPE_CHECKING:
     from app.utils.config_loader import AppConfig
@@ -73,6 +73,15 @@ class CollectorScheduler:
             replace_existing=True,
         )
 
+        # 다문화가족실태조사 통계 — 매 24시간 (법령과 동일 주기)
+        self._scheduler.add_job(
+            self._job_survey,
+            trigger=IntervalTrigger(hours=sched_cfg.law_interval_hours),
+            id="collect_survey",
+            name="다문화가족실태조사 수집",
+            replace_existing=True,
+        )
+
         self._scheduler.start()
         self._running = True
         logger.info(
@@ -117,6 +126,14 @@ class CollectorScheduler:
             if self._signal:
                 self._signal.error_occurred.emit("지원사업 수집 중 오류 발생")
 
+    def _job_survey(self) -> None:
+        try:
+            collect_survey(self._config)
+        except Exception:
+            logger.exception("다문화가족실태조사 수집 실패")
+            if self._signal:
+                self._signal.error_occurred.emit("다문화가족실태조사 수집 중 오류 발생")
+
     # ---------------------------------------------------------------
 
     def run_once(self) -> None:
@@ -136,6 +153,10 @@ class CollectorScheduler:
             support_count = collect_support(self._config)
         except Exception:
             logger.exception("즉시 지원사업 수집 실패")
+        try:
+            collect_survey(self._config)
+        except Exception:
+            logger.exception("즉시 다문화가족실태조사 수집 실패")
 
         logger.info("즉시 수집 완료 — 뉴스 %d, 법령 %d, 지원 %d",
                      news_count, laws_count, support_count)
