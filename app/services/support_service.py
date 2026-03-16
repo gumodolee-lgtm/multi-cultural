@@ -33,9 +33,9 @@ _MULTICULTURAL_KEYWORDS = [
 class SupportService:
     """정부24 공공서비스 API 기반 지원사업 수집기"""
 
-    # 정부24 공공서비스 정보 API (2024년 엔드포인트 이전)
-    SERVICE_LIST_URL = "https://api.odcloud.kr/api/gov24/v1/serviceList"
-    SERVICE_DETAIL_URL = "https://api.odcloud.kr/api/gov24/v1/serviceDetail"
+    # 정부24 공공서비스 정보 API (v3)
+    SERVICE_LIST_URL = "https://api.odcloud.kr/api/gov24/v3/serviceList"
+    SERVICE_DETAIL_URL = "https://api.odcloud.kr/api/gov24/v3/serviceDetail"
 
     def __init__(self, config: AppConfig):
         self._config = config
