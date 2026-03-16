@@ -79,7 +79,7 @@ class DetailDialog(QDialog):
         btn_row = QHBoxLayout()
         btn_row.addStretch()
 
-        if url:
+        if url and "example.com" not in url:
             link_btn = QPushButton(tr("view_source"))
             link_btn.setStyleSheet(
                 "QPushButton { background: #1565C0; color: white; border: none;"

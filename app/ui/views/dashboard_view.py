@@ -21,13 +21,30 @@ class DashboardView(QWidget):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        stats = DataProvider.get_dashboard_stats()
-        all_news = DataProvider.get_all_news()
-        all_support = DataProvider.get_all_support()
-
         self._scroll = QScrollArea()
         self._scroll.setWidgetResizable(True)
         self._scroll.setStyleSheet("QScrollArea { border: none; background: #F5F5F5; }")
+
+        self._rebuild_content()
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.addWidget(self._scroll)
+
+    def refresh_data(self) -> None:
+        """데이터를 DB에서 다시 읽어 대시보드를 갱신한다."""
+        # 기존 스크롤 내부 컨텐츠만 교체 (레이아웃은 유지)
+        if self._scroll is not None:
+            old_widget = self._scroll.widget()
+            if old_widget:
+                old_widget.deleteLater()
+            self._rebuild_content()
+
+    def _rebuild_content(self) -> None:
+        """스크롤 영역 안의 컨텐츠를 새로 구성한다."""
+        stats = DataProvider.get_dashboard_stats()
+        all_news = DataProvider.get_all_news()
+        all_support = DataProvider.get_all_support()
 
         container = QWidget()
         layout = QVBoxLayout(container)
@@ -80,22 +97,6 @@ class DashboardView(QWidget):
 
         layout.addStretch()
         self._scroll.setWidget(container)
-
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 0)
-        outer.addWidget(self._scroll)
-
-    def refresh_data(self) -> None:
-        """데이터를 DB에서 다시 읽어 대시보드를 갱신한다."""
-        # 기존 위젯 제거 후 재구성
-        if self.layout():
-            while self.layout().count():
-                child = self.layout().takeAt(0)
-                if child.widget():
-                    child.widget().deleteLater()
-        else:
-            QVBoxLayout(self)
-        self._build_ui()
 
     def _make_kpi_card(self, icon: str, label: str, value: str, color: str) -> QFrame:
         card = QFrame()

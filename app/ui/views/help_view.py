@@ -34,10 +34,26 @@ class HelpView(QWidget):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("QScrollArea { border: none; background: #F5F5F5; }")
+        self._scroll = QScrollArea()
+        self._scroll.setWidgetResizable(True)
+        self._scroll.setStyleSheet("QScrollArea { border: none; background: #F5F5F5; }")
 
+        self._rebuild_content()
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.addWidget(self._scroll)
+
+    def refresh_data(self) -> None:
+        """언어 전환 시 뷰를 재구성한다."""
+        if self._scroll is not None:
+            old = self._scroll.widget()
+            if old:
+                old.deleteLater()
+            self._rebuild_content()
+
+    def _rebuild_content(self) -> None:
+        """스크롤 내부 컨텐츠를 (재)구성한다."""
         container = QWidget()
         layout = QVBoxLayout(container)
         layout.setContentsMargins(24, 20, 24, 20)
@@ -84,22 +100,7 @@ class HelpView(QWidget):
         layout.addWidget(info_frame)
 
         layout.addStretch()
-        scroll.setWidget(container)
-
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 0)
-        outer.addWidget(scroll)
-
-    def refresh_data(self) -> None:
-        """언어 전환 시 뷰를 재구성한다."""
-        if self.layout():
-            while self.layout().count():
-                child = self.layout().takeAt(0)
-                if child.widget():
-                    child.widget().deleteLater()
-        else:
-            QVBoxLayout(self)
-        self._build_ui()
+        self._scroll.setWidget(container)
 
     def _section_title(self, text: str) -> QLabel:
         lbl = QLabel(text)

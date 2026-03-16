@@ -3,6 +3,7 @@ config.yaml + .env 파일을 읽어 앱 전체에서 사용할 설정 객체를 
 """
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -10,7 +11,16 @@ import yaml
 from dotenv import load_dotenv
 import os
 
-_ROOT = Path(__file__).parent.parent.parent
+# PyInstaller로 패키징된 경우:
+#   _ROOT = exe 위치 (사용자 파일: .env, data/)
+#   _BUNDLE = _internal 디렉토리 (번들 파일: config.yaml)
+# 개발 모드: 둘 다 소스 루트
+if getattr(sys, 'frozen', False):
+    _ROOT = Path(sys.executable).parent
+    _BUNDLE = Path(getattr(sys, '_MEIPASS', _ROOT))
+else:
+    _ROOT = Path(__file__).parent.parent.parent
+    _BUNDLE = _ROOT
 
 
 @dataclass
@@ -52,13 +62,21 @@ def load_config(config_path: Path | None = None) -> AppConfig:
     if _config is not None:
         return _config
 
-    # .env 파일 로드 (없으면 무시)
-    env_file = _ROOT / ".env"
-    if env_file.exists():
-        load_dotenv(env_file)
+    # .env 파일 로드 — exe 옆 → _internal 순으로 탐색
+    for candidate in [_ROOT / ".env", _BUNDLE / ".env"]:
+        if candidate.exists():
+            load_dotenv(candidate)
+            break
 
-    # config.yaml 로드
-    yaml_path = config_path or (_ROOT / "config.yaml")
+    # config.yaml 로드 — _internal(번들) → exe 옆 순으로 탐색
+    yaml_path = config_path
+    if yaml_path is None:
+        for candidate in [_BUNDLE / "config.yaml", _ROOT / "config.yaml"]:
+            if candidate.exists():
+                yaml_path = candidate
+                break
+        else:
+            yaml_path = _ROOT / "config.yaml"  # 기본값 (없어도 빈 dict로 처리)
     raw: dict = {}
     if yaml_path.exists():
         with open(yaml_path, encoding="utf-8") as f:

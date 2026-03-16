@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 
 # 한국 주요 언론사 RSS (다문화/사회 관련 카테고리)
 DEFAULT_RSS_FEEDS = [
-    {"name": "연합뉴스 사회", "url": "https://www.yna.co.kr/rss/society.xml", "enabled": True},
-    {"name": "KBS 사회", "url": "https://news.kbs.co.kr/news/pc/main/rss/rss_society.xml", "enabled": True},
-    {"name": "한겨레 사회", "url": "https://www.hani.co.kr/rss/society/", "enabled": True},
+    {"name": "연합뉴스", "url": "https://www.yna.co.kr/rss/society.xml", "enabled": True},
+    {"name": "SBS", "url": "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=01&plink=RSSREADER", "enabled": True},
+    {"name": "서울신문", "url": "https://www.seoul.co.kr/xml/rss/rss_society.xml", "enabled": True},
 ]
 
 
@@ -39,7 +39,8 @@ class NewsService:
     def __init__(self, config: AppConfig):
         self._config = config
         self._keywords = config.news_keywords or [
-            "다문화", "결혼이민", "외국인 주민", "이주민", "다문화가족", "귀화",
+            "다문화", "결혼이민", "외국인", "이주민", "다문화가족", "귀화",
+            "이민", "체류", "비자", "국적", "난민", "다누리",
         ]
         self._max_days = config.news_max_days
         self._feeds = DEFAULT_RSS_FEEDS

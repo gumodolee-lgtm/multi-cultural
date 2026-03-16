@@ -18,20 +18,21 @@ class BookmarkView(QWidget):
 
     def refresh_data(self) -> None:
         """북마크 데이터를 다시 읽어 뷰를 갱신한다."""
-        if self.layout():
-            while self.layout().count():
-                child = self.layout().takeAt(0)
+        layout = self.layout()
+        if layout:
+            while layout.count():
+                child = layout.takeAt(0)
                 if child.widget():
                     child.widget().deleteLater()
-        else:
-            QVBoxLayout(self)
-        self._build_ui()
+            self._populate(layout)
 
     def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
+        self._populate(layout)
 
+    def _populate(self, layout: QVBoxLayout) -> None:
         # 헤더
         header_w = QWidget()
         header_w.setStyleSheet("background: white; border-bottom: 1px solid #E0E0E0;")

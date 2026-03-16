@@ -6,8 +6,12 @@ import sys
 import logging
 from pathlib import Path
 
-# 프로젝트 루트를 sys.path에 추가 (패키지 임포트 보장)
-ROOT = Path(__file__).parent
+# PyInstaller exe: 사용자 파일(data/, .env)은 exe 옆에 위치
+if getattr(sys, 'frozen', False):
+    ROOT = Path(sys.executable).parent
+else:
+    ROOT = Path(__file__).parent
+
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -46,8 +50,9 @@ def main() -> None:
     config = load_config()
 
     # 2. DB 초기화 (테이블 생성) + 첫 실행 시 초기 데이터 시딩
-    init_db(config.db_path)
-    logger.info("DB 초기화 완료: %s", config.db_path)
+    db_path = str(ROOT / config.db_path)
+    init_db(db_path)
+    logger.info("DB 초기화 완료: %s", db_path)
     seed_if_empty()
 
     # 3. Qt 애플리케이션 생성
