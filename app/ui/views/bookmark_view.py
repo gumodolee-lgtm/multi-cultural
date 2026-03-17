@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from app.services.data_provider import DataProvider
+from app.ui import styles
 from app.ui.widgets.detail_dialog import DetailDialog
 from app.utils.i18n import tr
 
@@ -35,12 +36,12 @@ class BookmarkView(QWidget):
     def _populate(self, layout: QVBoxLayout) -> None:
         # 헤더
         header_w = QWidget()
-        header_w.setStyleSheet("background: white; border-bottom: 1px solid #E0E0E0;")
+        header_w.setStyleSheet(f"background: {styles.COLORS.surface}; border-bottom: 1px solid {styles.COLORS.divider};")
         header_layout = QVBoxLayout(header_w)
         header_layout.setContentsMargins(24, 16, 24, 16)
 
         header = QLabel(tr("bookmark_title"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold;")
+        header.setStyleSheet(f"{styles.FONTS.h2} color: {styles.COLORS.text_primary};")
         header_layout.addWidget(header)
 
         all_news = DataProvider.get_all_news()
@@ -52,23 +53,13 @@ class BookmarkView(QWidget):
         total = len(bookmarked_news) + len(bookmarked_laws) + len(bookmarked_support)
 
         count = QLabel(tr("saved_items_count").replace("{count}", str(total)))
-        count.setStyleSheet("color: #757575; font-size: 12px;")
+        count.setStyleSheet(f"{styles.FONTS.caption} color: {styles.COLORS.text_secondary};")
         header_layout.addWidget(count)
         layout.addWidget(header_w)
 
         # 탭
         tabs = QTabWidget()
-        tabs.setStyleSheet("""
-            QTabWidget::pane { border: none; }
-            QTabBar::tab {
-                padding: 8px 20px; font-size: 13px;
-                border: none; border-bottom: 2px solid transparent;
-            }
-            QTabBar::tab:selected {
-                color: #1565C0; border-bottom: 2px solid #1565C0; font-weight: bold;
-            }
-            QTabBar::tab:!selected { color: #757575; }
-        """)
+        tabs.setStyleSheet(styles.get_tab_style())
 
         tabs.addTab(
             self._make_list(bookmarked_news, "news"),
@@ -87,7 +78,7 @@ class BookmarkView(QWidget):
     def _make_list(self, items: list[dict], kind: str) -> QWidget:
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("QScrollArea { border: none; background: #F5F5F5; }")
+        scroll.setStyleSheet(f"QScrollArea {{ border: none; background: {styles.COLORS.background}; }}")
 
         container = QWidget()
         layout = QVBoxLayout(container)
@@ -97,7 +88,7 @@ class BookmarkView(QWidget):
         if not items:
             empty = QLabel(tr("no_saved_items"))
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            empty.setStyleSheet("color: #9E9E9E; padding: 40px;")
+            empty.setStyleSheet(f"color: {styles.COLORS.text_secondary}; padding: 40px;")
             layout.addWidget(empty)
         else:
             for item in items:
@@ -111,15 +102,12 @@ class BookmarkView(QWidget):
     def _make_card(self, item: dict, kind: str) -> QFrame:
         card = QFrame()
         card.setCursor(Qt.CursorShape.PointingHandCursor)
-        card.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-            "QFrame:hover { border-color: #FFB300; }"
-        )
+        card.setStyleSheet(styles.get_card_style(hover_color=styles.COLORS.bookmark))
         layout = QHBoxLayout(card)
         layout.setContentsMargins(16, 12, 16, 12)
 
         star = QLabel("⭐")
-        star.setStyleSheet("font-size: 20px;")
+        star.setStyleSheet("font-size: 16px;")
         layout.addWidget(star)
 
         info = QVBoxLayout()
@@ -136,11 +124,11 @@ class BookmarkView(QWidget):
         title.setTextFormat(Qt.TextFormat.PlainText)
         meta.setTextFormat(Qt.TextFormat.PlainText)
 
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_primary};")
         title.setWordWrap(True)
         info.addWidget(title)
 
-        meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
+        meta.setStyleSheet(f"{styles.FONTS.small} color: {styles.COLORS.text_secondary};")
         info.addWidget(meta)
         layout.addLayout(info, 1)
 

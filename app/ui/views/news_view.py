@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from app.services.data_provider import DataProvider
+from app.ui import styles
 from app.ui.widgets.search_bar import SearchBar
 from app.ui.widgets.filter_bar import FilterBar
 from app.ui.widgets.item_card import NewsCard
@@ -30,13 +31,13 @@ class NewsView(QWidget):
 
         # 상단 바 (검색 + 필터)
         top_bar = QWidget()
-        top_bar.setStyleSheet("background: white; border-bottom: 1px solid #E0E0E0;")
+        top_bar.setStyleSheet(f"background: {styles.COLORS.surface}; border-bottom: 1px solid {styles.COLORS.divider};")
         top_layout = QVBoxLayout(top_bar)
         top_layout.setContentsMargins(16, 12, 16, 12)
         top_layout.setSpacing(8)
 
         header = QLabel(f"📰 {tr('news')}")
-        header.setStyleSheet("font-size: 18px; font-weight: bold;")
+        header.setStyleSheet(f"{styles.FONTS.h2} color: {styles.COLORS.text_primary};")
         top_layout.addWidget(header)
 
         self._search = SearchBar(tr("news_search"))
@@ -57,7 +58,7 @@ class NewsView(QWidget):
         # 좌측: 뉴스 목록
         list_area = QScrollArea()
         list_area.setWidgetResizable(True)
-        list_area.setStyleSheet("QScrollArea { border: none; background: #FAFAFA; }")
+        list_area.setStyleSheet(f"QScrollArea {{ border: none; background: {styles.COLORS.background}; }}")
         self._list_container = QWidget()
         self._list_layout = QVBoxLayout(self._list_container)
         self._list_layout.setContentsMargins(0, 0, 0, 0)
@@ -84,7 +85,7 @@ class NewsView(QWidget):
         if not data:
             empty = QLabel(tr("no_results"))
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            empty.setStyleSheet("color: #9E9E9E; padding: 40px;")
+            empty.setStyleSheet(f"color: {styles.COLORS.text_secondary}; padding: 40px;")
             self._list_layout.addWidget(empty)
         else:
             for item in data:
@@ -107,12 +108,12 @@ class NewsView(QWidget):
             svc = AISummaryService(load_config())
             summary = svc.summarize_news(item["title"], item["content"])
         meta = [
-            f"📰 {item['source']}  ·  {item['category']}",
-            f"📅 {item['published']}",
+            f"<b>{tr('source')}:</b> {item['source']}  ·  <b>{tr('category')}:</b> {item['category']}",
+            f"<b>{tr('published_date')}:</b> {item['published']}",
         ]
         if summary:
             meta.append("")
-            meta.append(f"💡 AI 요약: {summary}")
+            meta.append(f"💡 <b>{tr('ai_summary')}:</b> {summary}")
         self._detail.show_detail(
             title=item["title"],
             meta_lines=meta,

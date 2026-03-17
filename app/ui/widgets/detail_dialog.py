@@ -9,6 +9,9 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
+from app.ui.styles import (
+    COLORS, FONTS, get_primary_button_style, get_outline_button_style,
+)
 from app.utils.i18n import tr
 
 
@@ -27,7 +30,7 @@ class DetailDialog(QDialog):
         self.setWindowTitle(title[:60])
         self.setMinimumSize(520, 400)
         self.resize(600, 500)
-        self.setStyleSheet("background: white;")
+        self.setStyleSheet(f"background: {COLORS.surface};")
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 20, 24, 20)
@@ -36,7 +39,7 @@ class DetailDialog(QDialog):
         # 제목
         lbl_title = QLabel(title)
         lbl_title.setTextFormat(Qt.TextFormat.PlainText)
-        lbl_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #212121;")
+        lbl_title.setStyleSheet(f"{FONTS.h2} color: {COLORS.text_primary};")
         lbl_title.setWordWrap(True)
         layout.addWidget(lbl_title)
 
@@ -46,14 +49,14 @@ class DetailDialog(QDialog):
                 continue
             meta = QLabel(line)
             meta.setTextFormat(Qt.TextFormat.PlainText)
-            meta.setStyleSheet("color: #757575; font-size: 12px;")
+            meta.setStyleSheet(f"{FONTS.caption} color: {COLORS.text_secondary};")
             meta.setWordWrap(True)
             layout.addWidget(meta)
 
         # 구분선
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
-        sep.setStyleSheet("color: #E0E0E0;")
+        sep.setStyleSheet(f"color: {COLORS.divider};")
         layout.addWidget(sep)
 
         # 본문 (스크롤)
@@ -67,7 +70,9 @@ class DetailDialog(QDialog):
 
         lbl_body = QLabel(body if body else tr("no_content"))
         lbl_body.setTextFormat(Qt.TextFormat.PlainText)
-        lbl_body.setStyleSheet("color: #424242; font-size: 13px;")
+        lbl_body.setStyleSheet(
+            f"{FONTS.body} color: {COLORS.text_primary}; line-height: 1.6;"
+        )
         lbl_body.setWordWrap(True)
         body_layout.addWidget(lbl_body)
         body_layout.addStretch()
@@ -81,20 +86,12 @@ class DetailDialog(QDialog):
 
         if url and "example.com" not in url:
             link_btn = QPushButton(tr("view_source"))
-            link_btn.setStyleSheet(
-                "QPushButton { background: #1565C0; color: white; border: none;"
-                " border-radius: 6px; padding: 8px 16px; }"
-                "QPushButton:hover { background: #0D47A1; }"
-            )
+            link_btn.setStyleSheet(get_primary_button_style())
             link_btn.clicked.connect(lambda: webbrowser.open(url))
             btn_row.addWidget(link_btn)
 
         close_btn = QPushButton(tr("close"))
-        close_btn.setStyleSheet(
-            "QPushButton { background: #E0E0E0; color: #424242; border: none;"
-            " border-radius: 6px; padding: 8px 16px; }"
-            "QPushButton:hover { background: #BDBDBD; }"
-        )
+        close_btn.setStyleSheet(get_outline_button_style(COLORS.text_secondary))
         close_btn.clicked.connect(self.close)
         btn_row.addWidget(close_btn)
 

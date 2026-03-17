@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from app.services.data_provider import DataProvider
+from app.ui import styles
 from app.ui.widgets.search_bar import SearchBar
 from app.ui.widgets.filter_bar import FilterBar
 from app.ui.widgets.item_card import LawCard
@@ -28,13 +29,13 @@ class LawView(QWidget):
 
         # 상단 바
         top_bar = QWidget()
-        top_bar.setStyleSheet("background: white; border-bottom: 1px solid #E0E0E0;")
+        top_bar.setStyleSheet(f"background: {styles.COLORS.surface}; border-bottom: 1px solid {styles.COLORS.divider};")
         top_layout = QVBoxLayout(top_bar)
         top_layout.setContentsMargins(16, 12, 16, 12)
         top_layout.setSpacing(8)
 
         header = QLabel(f"⚖️ {tr('law')}")
-        header.setStyleSheet("font-size: 18px; font-weight: bold;")
+        header.setStyleSheet(f"{styles.FONTS.h2} color: {styles.COLORS.text_primary};")
         top_layout.addWidget(header)
 
         self._search = SearchBar("법령 검색 (법령명, 조문 키워드)...")
@@ -53,7 +54,7 @@ class LawView(QWidget):
 
         list_area = QScrollArea()
         list_area.setWidgetResizable(True)
-        list_area.setStyleSheet("QScrollArea { border: none; background: #FAFAFA; }")
+        list_area.setStyleSheet(f"QScrollArea {{ border: none; background: {styles.COLORS.background}; }}")
         self._list_container = QWidget()
         self._list_layout = QVBoxLayout(self._list_container)
         self._list_layout.setContentsMargins(0, 0, 0, 0)
@@ -76,7 +77,7 @@ class LawView(QWidget):
         if not data:
             empty = QLabel(tr("no_results"))
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            empty.setStyleSheet("color: #9E9E9E; padding: 40px;")
+            empty.setStyleSheet(f"color: {styles.COLORS.text_secondary}; padding: 40px;")
             self._list_layout.addWidget(empty)
         else:
             for item in data:

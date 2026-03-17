@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
+from app.ui import styles
 from app.utils.i18n import tr
 
 
@@ -36,7 +37,7 @@ class HelpView(QWidget):
     def _build_ui(self) -> None:
         self._scroll = QScrollArea()
         self._scroll.setWidgetResizable(True)
-        self._scroll.setStyleSheet("QScrollArea { border: none; background: #F5F5F5; }")
+        self._scroll.setStyleSheet(f"QScrollArea {{ border: none; background: {styles.COLORS.background}; }}")
 
         self._rebuild_content()
 
@@ -61,11 +62,11 @@ class HelpView(QWidget):
 
         # 헤더
         header = QLabel(tr("help_title"))
-        header.setStyleSheet("font-size: 22px; font-weight: bold; color: #212121;")
+        header.setStyleSheet(f"{styles.FONTS.h1} color: {styles.COLORS.text_primary};")
         layout.addWidget(header)
 
         sub = QLabel(tr("help_subtitle"))
-        sub.setStyleSheet("color: #757575; font-size: 13px;")
+        sub.setStyleSheet(f"color: {styles.COLORS.text_secondary}; {styles.FONTS.body}")
         layout.addWidget(sub)
 
         # FAQ 섹션
@@ -81,9 +82,7 @@ class HelpView(QWidget):
         # 앱 정보
         layout.addWidget(self._section_title(tr("app_info_section")))
         info_frame = QFrame()
-        info_frame.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-        )
+        info_frame.setStyleSheet(styles.get_card_style())
         info_layout = QVBoxLayout(info_frame)
         info_layout.setContentsMargins(16, 12, 16, 12)
         info_layout.setSpacing(4)
@@ -94,7 +93,7 @@ class HelpView(QWidget):
             tr("app_data_source"),
         ]:
             lbl = QLabel(line)
-            lbl.setStyleSheet("color: #616161; font-size: 12px;")
+            lbl.setStyleSheet(f"color: {styles.COLORS.text_secondary}; {styles.FONTS.caption}")
             info_layout.addWidget(lbl)
 
         layout.addWidget(info_frame)
@@ -104,28 +103,23 @@ class HelpView(QWidget):
 
     def _section_title(self, text: str) -> QLabel:
         lbl = QLabel(text)
-        lbl.setStyleSheet(
-            "font-size: 16px; font-weight: bold; color: #212121;"
-            " padding-top: 12px; border-bottom: 2px solid #1565C0; padding-bottom: 4px;"
-        )
+        lbl.setStyleSheet(styles.get_section_title_style())
         return lbl
 
     def _faq_card(self, num: int, question: str, answer: str) -> QFrame:
         frame = QFrame()
-        frame.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-        )
+        frame.setStyleSheet(styles.get_card_style())
         layout = QVBoxLayout(frame)
         layout.setContentsMargins(16, 12, 16, 12)
         layout.setSpacing(6)
 
         q_lbl = QLabel(f"Q{num}. {question}")
-        q_lbl.setStyleSheet("font-size: 14px; font-weight: bold; color: #1565C0;")
+        q_lbl.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.primary};")
         q_lbl.setWordWrap(True)
         layout.addWidget(q_lbl)
 
         a_lbl = QLabel(answer)
-        a_lbl.setStyleSheet("color: #424242; font-size: 13px;")
+        a_lbl.setStyleSheet(f"color: {styles.COLORS.text_primary}; {styles.FONTS.body}")
         a_lbl.setWordWrap(True)
         layout.addWidget(a_lbl)
 
@@ -133,19 +127,17 @@ class HelpView(QWidget):
 
     def _contact_card(self, name: str, number: str, desc: str) -> QFrame:
         frame = QFrame()
-        frame.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-        )
+        frame.setStyleSheet(styles.get_card_style())
         layout = QVBoxLayout(frame)
         layout.setContentsMargins(16, 10, 16, 10)
         layout.setSpacing(2)
 
         title = QLabel(f"📞  {name}  —  {number}")
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_primary};")
         layout.addWidget(title)
 
         desc_lbl = QLabel(desc)
-        desc_lbl.setStyleSheet("color: #757575; font-size: 12px;")
+        desc_lbl.setStyleSheet(f"color: {styles.COLORS.text_secondary}; {styles.FONTS.caption}")
         layout.addWidget(desc_lbl)
 
         return frame

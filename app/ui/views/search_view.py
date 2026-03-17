@@ -9,8 +9,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from app.services.data_provider import DataProvider
+from app.ui import styles
 from app.ui.widgets.search_bar import SearchBar
-from app.ui.styles import COLORS
 from app.ui.widgets.detail_dialog import DetailDialog
 from app.utils.i18n import tr
 
@@ -27,18 +27,18 @@ class SearchView(QWidget):
 
         # 상단 검색 영역
         top = QWidget()
-        top.setStyleSheet("background: #1565C0;")
+        top.setStyleSheet(f"background: {styles.COLORS.primary};")
         top_layout = QVBoxLayout(top)
         top_layout.setContentsMargins(40, 30, 40, 30)
         top_layout.setSpacing(12)
 
         title = QLabel(tr("search_title"))
-        title.setStyleSheet("color: white; font-size: 22px; font-weight: bold;")
+        title.setStyleSheet(f"color: {styles.COLORS.text_on_primary}; {styles.FONTS.h1}")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         top_layout.addWidget(title)
 
         desc = QLabel(tr("search_desc"))
-        desc.setStyleSheet("color: rgba(255,255,255,0.8); font-size: 13px;")
+        desc.setStyleSheet(f"color: rgba(255,255,255,0.8); {styles.FONTS.body}")
         desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         top_layout.addWidget(desc)
 
@@ -50,7 +50,7 @@ class SearchView(QWidget):
         # 결과 영역
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("QScrollArea { border: none; background: #F5F5F5; }")
+        scroll.setStyleSheet(f"QScrollArea {{ border: none; background: {styles.COLORS.background}; }}")
         self._result_container = QWidget()
         self._result_layout = QVBoxLayout(self._result_container)
         self._result_layout.setContentsMargins(24, 16, 24, 16)
@@ -65,7 +65,7 @@ class SearchView(QWidget):
         self._clear_results()
 
         hint = QLabel(tr("popular_keywords"))
-        hint.setStyleSheet("font-size: 14px; font-weight: bold; color: #757575;")
+        hint.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_secondary};")
         self._result_layout.addWidget(hint)
 
         keywords = ["다문화", "결혼이민", "귀화", "지원사업", "출입국", "한국어 교육"]
@@ -73,8 +73,8 @@ class SearchView(QWidget):
         for kw in keywords:
             chip = QLabel(kw)
             chip.setStyleSheet(
-                "background: white; border: 1px solid #E0E0E0; border-radius: 16px;"
-                " padding: 6px 14px; color: #1565C0; font-size: 12px;"
+                f"background: {styles.COLORS.surface}; border: 1px solid {styles.COLORS.divider}; border-radius: 16px;"
+                f" padding: 6px 14px; color: {styles.COLORS.primary}; {styles.FONTS.caption}"
             )
             row.addWidget(chip)
         row.addStretch()
@@ -91,12 +91,12 @@ class SearchView(QWidget):
 
         total = len(news_results) + len(law_results) + len(support_results)
         summary = QLabel(f"'{text}' {tr('search_result')}: {total}")
-        summary.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        summary.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_primary};")
         self._result_layout.addWidget(summary)
 
         if total == 0:
             empty = QLabel(tr("no_results"))
-            empty.setStyleSheet("color: #9E9E9E; padding: 40px;")
+            empty.setStyleSheet(f"color: {styles.COLORS.text_secondary}; padding: 40px;")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self._result_layout.addWidget(empty)
         else:
@@ -112,7 +112,7 @@ class SearchView(QWidget):
     def _add_section(self, title: str, items: list[dict], kind: str) -> None:
         sec = QLabel(f"{title} ({len(items)}건)")
         sec.setStyleSheet(
-            "font-size: 14px; font-weight: bold; color: #424242; padding-top: 8px;"
+            f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_primary}; padding-top: 8px;"
         )
         self._result_layout.addWidget(sec)
 
@@ -123,10 +123,7 @@ class SearchView(QWidget):
     def _make_result_card(self, item: dict, kind: str) -> QFrame:
         card = QFrame()
         card.setCursor(Qt.CursorShape.PointingHandCursor)
-        card.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-            "QFrame:hover { border-color: #1565C0; }"
-        )
+        card.setStyleSheet(styles.get_card_style(hover_color=styles.COLORS.primary))
         layout = QVBoxLayout(card)
         layout.setContentsMargins(16, 12, 16, 12)
         layout.setSpacing(4)
@@ -144,11 +141,11 @@ class SearchView(QWidget):
         title.setTextFormat(Qt.TextFormat.PlainText)
         meta.setTextFormat(Qt.TextFormat.PlainText)
 
-        title.setStyleSheet("font-size: 13px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_primary};")
         title.setWordWrap(True)
         layout.addWidget(title)
 
-        meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
+        meta.setStyleSheet(f"color: {styles.COLORS.text_secondary}; {styles.FONTS.small}")
         layout.addWidget(meta)
 
         card.mousePressEvent = lambda e, i=item, k=kind: self._open_detail(i, k)

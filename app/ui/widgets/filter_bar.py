@@ -4,7 +4,7 @@ from __future__ import annotations
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QComboBox, QLabel
 from PyQt6.QtCore import pyqtSignal
 
-from app.ui.styles import FILTER_COMBO_STYLE
+from app.ui.styles import COLORS, FONTS, FILTER_COMBO_STYLE
 
 
 class FilterBar(QWidget):
@@ -22,7 +22,7 @@ class FilterBar(QWidget):
 
         for label_text, options in filters:
             lbl = QLabel(label_text)
-            lbl.setStyleSheet("color: #757575; font-size: 12px;")
+            lbl.setStyleSheet(f"{FONTS.caption} color: {COLORS.text_secondary};")
             layout.addWidget(lbl)
 
             combo = QComboBox()

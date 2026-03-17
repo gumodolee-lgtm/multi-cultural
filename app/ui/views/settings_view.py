@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 
 from app.services.settings_service import get_setting, set_setting
-from app.ui.styles import COLORS
+from app.ui import styles
 from app.utils.i18n import tr
 
 # 언어 코드 ↔ 콤보박스 인덱스 매핑
@@ -43,7 +43,7 @@ class SettingsView(QWidget):
     def _build_ui(self) -> None:
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("QScrollArea { border: none; background: #F5F5F5; }")
+        scroll.setStyleSheet(f"QScrollArea {{ border: none; background: {styles.COLORS.background}; }}")
 
         container = QWidget()
         layout = QVBoxLayout(container)
@@ -52,7 +52,7 @@ class SettingsView(QWidget):
 
         # 헤더
         header = QLabel(tr("settings_title"))
-        header.setStyleSheet("font-size: 22px; font-weight: bold; color: #212121;")
+        header.setStyleSheet(f"{styles.FONTS.h1} color: {styles.COLORS.text_primary};")
         layout.addWidget(header)
 
         # 1. 일반 설정
@@ -79,23 +79,7 @@ class SettingsView(QWidget):
 
     def _make_group(self, title: str) -> QGroupBox:
         group = QGroupBox(title)
-        group.setStyleSheet("""
-            QGroupBox {
-                background: white;
-                border: 1px solid #E0E0E0;
-                border-radius: 8px;
-                padding: 16px;
-                margin-top: 8px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 16px;
-                padding: 0 8px;
-                color: #1565C0;
-            }
-        """)
+        group.setStyleSheet(styles.get_group_box_style())
         return group
 
     # ------------------------------------------------------------------
@@ -171,11 +155,7 @@ class SettingsView(QWidget):
             layout.addWidget(cb)
 
         edit_btn = QPushButton(tr("manage_keywords"))
-        edit_btn.setStyleSheet(
-            "QPushButton { background: transparent; color: #1565C0; border: 1px solid #1565C0;"
-            " border-radius: 4px; padding: 4px 12px; }"
-            "QPushButton:hover { background: #E3F2FD; }"
-        )
+        edit_btn.setStyleSheet(styles.get_outline_button_style())
         edit_btn.setFixedWidth(140)
         edit_btn.clicked.connect(self._on_manage_keywords)
         layout.addWidget(edit_btn)
@@ -228,35 +208,23 @@ class SettingsView(QWidget):
         layout.setSpacing(8)
 
         self._db_info = QLabel("DB: data/michub.db")
-        self._db_info.setStyleSheet("color: #757575; font-size: 12px;")
+        self._db_info.setStyleSheet(f"{styles.FONTS.caption} color: {styles.COLORS.text_secondary};")
         layout.addWidget(self._db_info)
 
         row = QHBoxLayout()
 
         refresh_btn = QPushButton(tr("update_now"))
-        refresh_btn.setStyleSheet(
-            "QPushButton { background: #1565C0; color: white; border: none;"
-            " border-radius: 6px; padding: 8px 16px; }"
-            "QPushButton:hover { background: #0D47A1; }"
-        )
+        refresh_btn.setStyleSheet(styles.get_primary_button_style())
         refresh_btn.clicked.connect(self._on_refresh)
         row.addWidget(refresh_btn)
 
         export_btn = QPushButton(tr("export_data"))
-        export_btn.setStyleSheet(
-            "QPushButton { background: transparent; color: #1565C0; border: 1px solid #1565C0;"
-            " border-radius: 6px; padding: 8px 16px; }"
-            "QPushButton:hover { background: #E3F2FD; }"
-        )
+        export_btn.setStyleSheet(styles.get_outline_button_style())
         export_btn.clicked.connect(self._on_export)
         row.addWidget(export_btn)
 
         clear_btn = QPushButton(tr("reset_all"))
-        clear_btn.setStyleSheet(
-            "QPushButton { background: transparent; color: #D32F2F; border: 1px solid #D32F2F;"
-            " border-radius: 6px; padding: 8px 16px; }"
-            "QPushButton:hover { background: #FFEBEE; }"
-        )
+        clear_btn.setStyleSheet(styles.get_danger_button_style())
         clear_btn.clicked.connect(self._on_clear)
         row.addWidget(clear_btn)
 
@@ -279,7 +247,7 @@ class SettingsView(QWidget):
             "MIT License"
         )
         about = QLabel(about_text)
-        about.setStyleSheet("color: #616161; font-size: 12px;")
+        about.setStyleSheet(f"color: {styles.COLORS.text_secondary}; {styles.FONTS.caption}")
         about.setWordWrap(True)
         layout.addWidget(about)
 

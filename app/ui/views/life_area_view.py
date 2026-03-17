@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from app.services.data_provider import DataProvider
-from app.ui.styles import COLORS
+from app.ui import styles
 from app.ui.widgets.detail_dialog import DetailDialog
 from app.utils.i18n import tr
 
@@ -47,7 +47,7 @@ class LifeAreaView(QWidget):
     def _build_ui(self) -> None:
         self._scroll = QScrollArea()
         self._scroll.setWidgetResizable(True)
-        self._scroll.setStyleSheet("QScrollArea { border: none; background: #F5F5F5; }")
+        self._scroll.setStyleSheet(f"QScrollArea {{ border: none; background: {styles.COLORS.background}; }}")
 
         self._rebuild_content()
 
@@ -72,11 +72,11 @@ class LifeAreaView(QWidget):
 
         # 헤더
         header = QLabel(f"{self._area.icon}  {self._area.title}")
-        header.setStyleSheet("font-size: 22px; font-weight: bold; color: #212121;")
+        header.setStyleSheet(f"{styles.FONTS.h1} color: {styles.COLORS.text_primary};")
         layout.addWidget(header)
 
         desc = QLabel(self._area.description)
-        desc.setStyleSheet("color: #757575; font-size: 13px;")
+        desc.setStyleSheet(f"{styles.FONTS.body} color: {styles.COLORS.text_secondary};")
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
@@ -87,9 +87,9 @@ class LifeAreaView(QWidget):
 
         summary_row = QHBoxLayout()
         summary_row.setSpacing(12)
-        summary_row.addWidget(self._summary_card("📰", tr("related_news").replace("📰 ", ""), len(news_items), COLORS["primary"]))
+        summary_row.addWidget(self._summary_card("📰", tr("related_news").replace("📰 ", ""), len(news_items), styles.COLORS.primary))
         summary_row.addWidget(self._summary_card("⚖️", tr("related_laws").replace("⚖️ ", ""), len(law_items), "#2E7D32"))
-        summary_row.addWidget(self._summary_card("🏛️", tr("related_support").replace("🏛️ ", ""), len(support_items), COLORS["accent"]))
+        summary_row.addWidget(self._summary_card("🏛️", tr("related_support").replace("🏛️ ", ""), len(support_items), styles.COLORS.accent))
         layout.addLayout(summary_row)
 
         # 뉴스 섹션
@@ -114,7 +114,7 @@ class LifeAreaView(QWidget):
         if not (news_items or law_items or support_items):
             empty = QLabel(tr("no_data_yet"))
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            empty.setStyleSheet("color: #9E9E9E; font-size: 14px; padding: 40px;")
+            empty.setStyleSheet(f"color: {styles.COLORS.text_secondary}; {styles.FONTS.body}; padding: 40px;")
             layout.addWidget(empty)
 
         layout.addStretch()
@@ -143,38 +143,29 @@ class LifeAreaView(QWidget):
         card = QFrame()
         card.setFixedHeight(80)
         card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        card.setStyleSheet(
-            f"QFrame {{ background: white; border: 1px solid #E0E0E0;"
-            f" border-radius: 10px; border-left: 4px solid {color}; }}"
-        )
+        card.setStyleSheet(styles.get_card_style())
         layout = QVBoxLayout(card)
         layout.setContentsMargins(14, 10, 14, 10)
+        layout.setSpacing(4)
 
-        top = QLabel(f"{icon}  {label}")
-        top.setStyleSheet("color: #757575; font-size: 11px;")
-        layout.addWidget(top)
+        count_label = QLabel(str(count))
+        count_label.setStyleSheet(f"color: {color}; {styles.FONTS.h2}")
+        layout.addWidget(count_label)
 
-        val = QLabel(str(count))
-        val.setStyleSheet(f"color: {color}; font-size: 24px; font-weight: bold;")
-        layout.addWidget(val)
+        label_widget = QLabel(f"{icon} {label}")
+        label_widget.setStyleSheet(f"{styles.FONTS.caption} color: {styles.COLORS.text_secondary};")
+        layout.addWidget(label_widget)
 
         return card
 
     def _section_title(self, text: str) -> QLabel:
         lbl = QLabel(text)
-        lbl.setStyleSheet(
-            f"font-size: 16px; font-weight: bold; color: #212121;"
-            f" padding-top: 12px; border-bottom: 2px solid {self._area.color};"
-            f" padding-bottom: 4px;"
-        )
+        lbl.setStyleSheet(styles.get_section_title_style(self._area.color))
         return lbl
 
     def _news_card(self, data: dict) -> QFrame:
         frame = QFrame()
-        frame.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-            "QFrame:hover { border-color: #1565C0; }"
-        )
+        frame.setStyleSheet(styles.get_card_style(hover_color=styles.COLORS.primary))
         frame.setCursor(Qt.CursorShape.PointingHandCursor)
         layout = QVBoxLayout(frame)
         layout.setContentsMargins(16, 12, 16, 12)
@@ -182,18 +173,18 @@ class LifeAreaView(QWidget):
 
         title = QLabel(data["title"])
         title.setTextFormat(Qt.TextFormat.PlainText)
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_primary};")
         title.setWordWrap(True)
         layout.addWidget(title)
 
         meta = QLabel(f"{data.get('source', '')}  ·  {data.get('published', '')}  ·  {data.get('category', '')}")
         meta.setTextFormat(Qt.TextFormat.PlainText)
-        meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
+        meta.setStyleSheet(f"{styles.FONTS.small} color: {styles.COLORS.text_secondary};")
         layout.addWidget(meta)
 
         summary = QLabel(data.get("summary", ""))
         summary.setTextFormat(Qt.TextFormat.PlainText)
-        summary.setStyleSheet("color: #616161; font-size: 12px;")
+        summary.setStyleSheet(f"{styles.FONTS.caption} color: {styles.COLORS.text_secondary};")
         summary.setWordWrap(True)
         layout.addWidget(summary)
 
@@ -215,27 +206,24 @@ class LifeAreaView(QWidget):
 
     def _law_card(self, data: dict) -> QFrame:
         frame = QFrame()
-        frame.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-            "QFrame:hover { border-color: #2E7D32; }"
-        )
+        frame.setStyleSheet(styles.get_card_style(hover_color="#2E7D32"))
         layout = QVBoxLayout(frame)
         layout.setContentsMargins(16, 12, 16, 12)
         layout.setSpacing(4)
 
         title = QLabel(f"⚖️  {data['name']}")
         title.setTextFormat(Qt.TextFormat.PlainText)
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_primary};")
         layout.addWidget(title)
 
         meta = QLabel(f"{tr('amended')} {data.get('amended_date', '')}  ·  {tr('effective')} {data.get('effective_date', '')}")
         meta.setTextFormat(Qt.TextFormat.PlainText)
-        meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
+        meta.setStyleSheet(f"{styles.FONTS.small} color: {styles.COLORS.text_secondary};")
         layout.addWidget(meta)
 
         summary = QLabel(data.get("summary", ""))
         summary.setTextFormat(Qt.TextFormat.PlainText)
-        summary.setStyleSheet("color: #616161; font-size: 12px;")
+        summary.setStyleSheet(f"{styles.FONTS.caption} color: {styles.COLORS.text_secondary};")
         summary.setWordWrap(True)
         layout.addWidget(summary)
 
@@ -258,17 +246,14 @@ class LifeAreaView(QWidget):
 
     def _support_card(self, data: dict) -> QFrame:
         frame = QFrame()
-        frame.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-            "QFrame:hover { border-color: #FF8F00; }"
-        )
+        frame.setStyleSheet(styles.get_card_style(hover_color=styles.COLORS.secondary))
         layout = QVBoxLayout(frame)
         layout.setContentsMargins(16, 12, 16, 12)
         layout.setSpacing(4)
 
         title = QLabel(f"🏛️  {data['name']}")
         title.setTextFormat(Qt.TextFormat.PlainText)
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_primary};")
         title.setWordWrap(True)
         layout.addWidget(title)
 
@@ -277,12 +262,12 @@ class LifeAreaView(QWidget):
             meta_parts.append(f"{tr('deadline_label')}: {data['apply_end']}")
         meta = QLabel("  ·  ".join(p for p in meta_parts if p))
         meta.setTextFormat(Qt.TextFormat.PlainText)
-        meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
+        meta.setStyleSheet(f"{styles.FONTS.small} color: {styles.COLORS.text_secondary};")
         layout.addWidget(meta)
 
         benefit = QLabel(f"💰 {data.get('benefit', '')}")
         benefit.setTextFormat(Qt.TextFormat.PlainText)
-        benefit.setStyleSheet("color: #2E7D32; font-size: 12px;")
+        benefit.setStyleSheet(f"{styles.FONTS.caption} color: #2E7D32;")
         benefit.setWordWrap(True)
         layout.addWidget(benefit)
 
@@ -377,7 +362,7 @@ class JobAreaView(LifeAreaView):
             icon="💼",
             title=tr("job_title"),
             description=tr("job_desc"),
-            color="#FF8F00",
+            color=styles.COLORS.secondary,
             news_keywords=["일자리", "취업", "고용", "근로", "직업", "창업"],
             law_keywords=["근로자", "고용", "노동"],
             support_keywords=["취업", "직업", "자격증", "일자리", "고용", "창업"],

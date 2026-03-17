@@ -322,6 +322,26 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
         "zh": "搜索新闻...",
     },
 
+    # -- 메타데이터 --
+    "source": {
+        "ko": "출처",
+        "en": "Source",
+        "vi": "Nguồn",
+        "zh": "来源",
+    },
+    "category": {
+        "ko": "카테고리",
+        "en": "Category",
+        "vi": "Chuyên mục",
+        "zh": "类别",
+    },
+    "published_date": {
+        "ko": "게시일",
+        "en": "Published",
+        "vi": "Ngày đăng",
+        "zh": "发布日期",
+    },
+
     # -- 생활영역 --
     "related_news": {
         "ko": "📰 관련 뉴스",

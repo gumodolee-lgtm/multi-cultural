@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from app.services.data_provider import DataProvider
-from app.ui.styles import COLORS
+from app.ui import styles
 from app.ui.widgets.detail_dialog import DetailDialog
 from app.utils.i18n import tr
 
@@ -23,7 +23,7 @@ class DashboardView(QWidget):
     def _build_ui(self) -> None:
         self._scroll = QScrollArea()
         self._scroll.setWidgetResizable(True)
-        self._scroll.setStyleSheet("QScrollArea { border: none; background: #F5F5F5; }")
+        self._scroll.setStyleSheet(f"QScrollArea {{ border: none; background: {styles.COLORS.background}; }}")
 
         self._rebuild_content()
 
@@ -53,23 +53,23 @@ class DashboardView(QWidget):
 
         # 환영 메시지
         welcome = QLabel(tr("dashboard_title"))
-        welcome.setStyleSheet("font-size: 22px; font-weight: bold; color: #212121;")
+        welcome.setStyleSheet(f"{styles.FONTS.h1} color: {styles.COLORS.text_primary};")
         layout.addWidget(welcome)
 
         sub = QLabel(f"{tr('last_update')}: {stats['last_update']}")
-        sub.setStyleSheet("color: #9E9E9E; font-size: 12px;")
+        sub.setStyleSheet(f"{styles.FONTS.caption} color: {styles.COLORS.text_secondary};")
         layout.addWidget(sub)
 
         # KPI 카드 행
         kpi_row = QHBoxLayout()
         kpi_row.setSpacing(16)
         kpi_data = [
-            ("📰", tr("collected_news"), str(stats["news_count"]), COLORS["primary"]),
-            ("⚖️", tr("major_laws"), str(stats["law_count"]), "#2E7D32"),
-            ("🏛️", tr("support_programs"), str(stats["support_count"]), COLORS["accent"]),
-            ("🔔", tr("today_news"), str(stats["today_news"]), COLORS["danger"]),
-            ("⏰", tr("closing_soon"), str(stats["closing_soon"]), "#7B1FA2"),
-            ("⭐", tr("bookmarked"), str(stats["bookmarked"]), COLORS["bookmark"]),
+            ("📰", tr("collected_news"), str(stats["news_count"]), styles.COLORS.primary),
+            ("⚖️", tr("major_laws"), str(stats["law_count"]), "#2E7D32"), # 초록색 유지
+            ("🏛️", tr("support_programs"), str(stats["support_count"]), styles.COLORS.accent),
+            ("🔔", tr("today_news"), str(stats["today_news"]), styles.COLORS.danger),
+            ("⏰", tr("closing_soon"), str(stats["closing_soon"]), "#7B1FA2"), # 보라색 유지
+            ("⭐", tr("bookmarked"), str(stats["bookmarked"]), styles.COLORS.bookmark),
         ]
         for icon, label, value, color in kpi_data:
             card = self._make_kpi_card(icon, label, value, color)
@@ -101,15 +101,13 @@ class DashboardView(QWidget):
     def _make_kpi_card(self, icon: str, label: str, value: str, color: str) -> QFrame:
         card = QFrame()
         card.setFixedHeight(100)
-        card.setStyleSheet(
-            f"QFrame {{ background: white; border: 1px solid #E0E0E0;"
-            f" border-radius: 12px; border-left: 4px solid {color}; }}"
-        )
+        card.setStyleSheet(styles.get_kpi_card_style(color))
         layout = QVBoxLayout(card)
         layout.setContentsMargins(16, 12, 16, 12)
+        layout.setSpacing(4)
 
         top = QLabel(f"{icon}  {label}")
-        top.setStyleSheet("color: #757575; font-size: 12px;")
+        top.setStyleSheet(f"{styles.FONTS.caption} color: {styles.COLORS.text_secondary};")
         layout.addWidget(top)
 
         val = QLabel(value)
@@ -120,32 +118,26 @@ class DashboardView(QWidget):
 
     def _section_title(self, text: str) -> QLabel:
         lbl = QLabel(text)
-        lbl.setStyleSheet(
-            "font-size: 16px; font-weight: bold; color: #212121;"
-            " padding-top: 8px; border-bottom: 2px solid #1565C0; padding-bottom: 4px;"
-        )
+        lbl.setStyleSheet(styles.get_section_title_style(styles.COLORS.primary))
         return lbl
 
     def _news_item(self, data: dict) -> QFrame:
         frame = QFrame()
         frame.setCursor(Qt.CursorShape.PointingHandCursor)
-        frame.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-            "QFrame:hover { border-color: #1565C0; }"
-        )
+        frame.setStyleSheet(styles.get_card_style(hover_color=styles.COLORS.primary))
         layout = QHBoxLayout(frame)
         layout.setContentsMargins(16, 12, 16, 12)
 
         left = QVBoxLayout()
         title = QLabel(data["title"])
         title.setTextFormat(Qt.TextFormat.PlainText)
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_primary};")
         title.setWordWrap(True)
         left.addWidget(title)
 
         meta = QLabel(f"{data.get('source', '')}  ·  {data.get('published', '')}  ·  {data.get('category', '')}")
         meta.setTextFormat(Qt.TextFormat.PlainText)
-        meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
+        meta.setStyleSheet(f"{styles.FONTS.small} color: {styles.COLORS.text_secondary};")
         left.addWidget(meta)
         layout.addLayout(left, 1)
 
@@ -168,23 +160,20 @@ class DashboardView(QWidget):
     def _support_item(self, data: dict) -> QFrame:
         frame = QFrame()
         frame.setCursor(Qt.CursorShape.PointingHandCursor)
-        frame.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-            "QFrame:hover { border-color: #FF8F00; }"
-        )
+        frame.setStyleSheet(styles.get_card_style(hover_color=styles.COLORS.secondary))
         layout = QHBoxLayout(frame)
         layout.setContentsMargins(16, 12, 16, 12)
 
         left = QVBoxLayout()
         title = QLabel(data.get("name", ""))
         title.setTextFormat(Qt.TextFormat.PlainText)
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{styles.FONTS.body} font-weight: bold; color: {styles.COLORS.text_primary};")
         title.setWordWrap(True)
         left.addWidget(title)
 
         meta = QLabel(f"{data.get('organizer', '')}  ·  마감: {data.get('apply_end', '')}  ·  {data.get('region', '')}")
         meta.setTextFormat(Qt.TextFormat.PlainText)
-        meta.setStyleSheet("color: #9E9E9E; font-size: 11px;")
+        meta.setStyleSheet(f"{styles.FONTS.small} color: {styles.COLORS.text_secondary};")
         left.addWidget(meta)
         layout.addLayout(left, 1)
 
@@ -198,9 +187,7 @@ class DashboardView(QWidget):
             pass
 
         deadline = QLabel(d_day)
-        deadline.setStyleSheet(
-            "color: #D32F2F; font-size: 16px; font-weight: bold;"
-        )
+        deadline.setStyleSheet(f"color: {styles.COLORS.danger}; {styles.FONTS.h3}")
         layout.addWidget(deadline)
 
         frame.mousePressEvent = lambda e, d=data: self._open_support_detail(d)
@@ -209,9 +196,7 @@ class DashboardView(QWidget):
     def _survey_section(self, data: list[dict]) -> QFrame:
         """다문화가족실태조사 통계 표시 카드"""
         frame = QFrame()
-        frame.setStyleSheet(
-            "QFrame { background: white; border: 1px solid #E0E0E0; border-radius: 8px; }"
-        )
+        frame.setStyleSheet(styles.get_card_style())
         layout = QVBoxLayout(frame)
         layout.setContentsMargins(16, 12, 16, 12)
         layout.setSpacing(8)
@@ -222,19 +207,19 @@ class DashboardView(QWidget):
         for item in data:
             year_card = QFrame()
             year_card.setStyleSheet(
-                "QFrame { background: #E8EAF6; border: 1px solid #C5CAE9;"
+                f"QFrame {{ background: {styles.COLORS.primary}; border: 1px solid {styles.COLORS.primary_dark};"
                 " border-radius: 8px; }"
             )
             year_layout = QVBoxLayout(year_card)
             year_layout.setContentsMargins(16, 10, 16, 10)
 
             year_label = QLabel(item["survey_year"])
-            year_label.setStyleSheet("font-size: 22px; font-weight: bold; color: #283593;")
+            year_label.setStyleSheet(f"{styles.FONTS.h1} color: {styles.COLORS.text_on_primary};")
             year_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             year_layout.addWidget(year_label)
 
             name_label = QLabel(tr("survey_year"))
-            name_label.setStyleSheet("font-size: 11px; color: #5C6BC0;")
+            name_label.setStyleSheet(f"{styles.FONTS.small} color: #BBDEFB;") # 밝은 파랑
             name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             year_layout.addWidget(name_label)
 

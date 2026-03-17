@@ -4,7 +4,7 @@ from __future__ import annotations
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLineEdit, QPushButton
 from PyQt6.QtCore import pyqtSignal
 
-from app.ui.styles import SEARCH_BAR_STYLE
+from app.ui.styles import SEARCH_BAR_STYLE, get_primary_button_style
 
 
 class SearchBar(QWidget):
@@ -25,9 +25,7 @@ class SearchBar(QWidget):
 
         btn = QPushButton("🔍 검색")
         btn.setStyleSheet(
-            "QPushButton { background: #1565C0; color: white; border: none;"
-            " border-radius: 20px; padding: 8px 20px; font-size: 14px; }"
-            "QPushButton:hover { background: #0D47A1; }"
+            get_primary_button_style().replace("border-radius: 6px", "border-radius: 20px")
         )
         btn.clicked.connect(self._emit_search)
         layout.addWidget(btn)

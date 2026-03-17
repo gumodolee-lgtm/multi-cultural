@@ -6,7 +6,9 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, Qt
 
-from app.ui.styles import TAG_STYLE_MAP, BOOKMARK_BTN_STYLE
+from app.ui.styles import (
+    COLORS, FONTS, TAG_STYLE_MAP, BOOKMARK_BTN_STYLE, LIST_ITEM_STYLE,
+)
 
 
 class _BaseCard(QFrame):
@@ -19,10 +21,7 @@ class _BaseCard(QFrame):
         super().__init__(parent)
         self._item_id = item_id
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setStyleSheet(
-            "QFrame { background: white; border-bottom: 1px solid #F0F0F0; padding: 8px; }"
-            "QFrame:hover { background-color: #E3F2FD; }"
-        )
+        self.setStyleSheet(LIST_ITEM_STYLE)
 
     def mousePressEvent(self, event):
         self.clicked.emit(self._item_id)
@@ -72,7 +71,7 @@ class NewsCard(_BaseCard):
         top = QHBoxLayout()
         top.addWidget(self._make_tag(data.get("category", "")))
         source = self._plain_label(f"{data.get('source', '')}  ·  {data.get('published', '')}")
-        source.setStyleSheet("color: #9E9E9E; font-size: 11px;")
+        source.setStyleSheet(f"{FONTS.small} color: {COLORS.text_hint};")
         top.addWidget(source)
         top.addStretch()
         top.addWidget(self._make_bookmark_btn(data.get("is_bookmarked", False)))
@@ -80,13 +79,13 @@ class NewsCard(_BaseCard):
 
         # 제목
         title = self._plain_label(data.get("title", ""))
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{FONTS.body} font-weight: bold; color: {COLORS.text_primary};")
         title.setWordWrap(True)
         layout.addWidget(title)
 
         # 요약
         summary = self._plain_label(data.get("summary", ""))
-        summary.setStyleSheet("color: #616161; font-size: 12px;")
+        summary.setStyleSheet(f"{FONTS.caption} color: {COLORS.text_secondary};")
         summary.setWordWrap(True)
         layout.addWidget(summary)
 
@@ -103,18 +102,18 @@ class LawCard(_BaseCard):
         top = QHBoxLayout()
         top.addWidget(self._make_tag(data.get("category", "")))
         date_lbl = self._plain_label(f"개정 {data.get('amended_date', '')}  ·  시행 {data.get('effective_date', '')}")
-        date_lbl.setStyleSheet("color: #9E9E9E; font-size: 11px;")
+        date_lbl.setStyleSheet(f"{FONTS.small} color: {COLORS.text_hint};")
         top.addWidget(date_lbl)
         top.addStretch()
         top.addWidget(self._make_bookmark_btn(data.get("is_bookmarked", False)))
         layout.addLayout(top)
 
         title = self._plain_label(data.get("name", ""))
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{FONTS.body} font-weight: bold; color: {COLORS.text_primary};")
         layout.addWidget(title)
 
         summary = self._plain_label(data.get("summary", ""))
-        summary.setStyleSheet("color: #616161; font-size: 12px;")
+        summary.setStyleSheet(f"{FONTS.caption} color: {COLORS.text_secondary};")
         summary.setWordWrap(True)
         layout.addWidget(summary)
 
@@ -131,25 +130,25 @@ class SupportCard(_BaseCard):
         top = QHBoxLayout()
         top.addWidget(self._make_tag(data.get("org_type", "")))
         region_lbl = self._plain_label(data.get("region", ""))
-        region_lbl.setStyleSheet("color: #757575; font-size: 11px;")
+        region_lbl.setStyleSheet(f"{FONTS.small} color: {COLORS.text_secondary};")
         top.addWidget(region_lbl)
         period = self._plain_label(f"{data.get('apply_start', '')} ~ {data.get('apply_end', '')}")
-        period.setStyleSheet("color: #9E9E9E; font-size: 11px;")
+        period.setStyleSheet(f"{FONTS.small} color: {COLORS.text_hint};")
         top.addWidget(period)
         top.addStretch()
         top.addWidget(self._make_bookmark_btn(data.get("is_bookmarked", False)))
         layout.addLayout(top)
 
         title = self._plain_label(data.get("name", ""))
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #212121;")
+        title.setStyleSheet(f"{FONTS.body} font-weight: bold; color: {COLORS.text_primary};")
         title.setWordWrap(True)
         layout.addWidget(title)
 
         benefit = self._plain_label(f"💰 {data.get('benefit', '')}")
-        benefit.setStyleSheet("color: #2E7D32; font-size: 12px;")
+        benefit.setStyleSheet(f"{FONTS.caption} color: {COLORS.success};")
         benefit.setWordWrap(True)
         layout.addWidget(benefit)
 
         org = self._plain_label(f"📞 {data.get('organizer', '')} ({data.get('contact', '')})")
-        org.setStyleSheet("color: #757575; font-size: 11px;")
+        org.setStyleSheet(f"{FONTS.small} color: {COLORS.text_secondary};")
         layout.addWidget(org)
